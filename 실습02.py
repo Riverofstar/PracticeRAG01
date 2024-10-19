@@ -16,8 +16,10 @@ from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.memory import ConversationBufferMemory
 from langchain.vectorstores import FAISS
 
-# API 키 사전 설정
-os.environ["OPENAI_API_KEY"] = 'sk-svcacct-_wlUE6RmnJZUUUKL2HFnRy_SUfdTjMttOxZuB6YdcXN1mDtni_nuWWGAloLyT3BlbkFJfeWHT4M6mCEq3ciZqVx-t0KtjXp4jGA6ApTi3VMBErvrVd6txEkSem9JNkkA'
+# OpenAI API 키 설정
+openai_api_key = st.secrets["openai"]["api_key"]
+os.environ["OPENAI_API_KEY"] = openai_api_key
+
 
 # 보드게임 CSV 파일에서 데이터 로드 함수
 def load_boardgames_data(filepath):
