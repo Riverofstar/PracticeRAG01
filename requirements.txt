@@ -10,3 +10,5 @@ faiss-cpu
 tiktoken
 pypdf
 docx2txt
+transformers 
+sentence-transformers
