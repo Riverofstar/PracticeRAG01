@@ -1,0 +1,12 @@
+langchain
+langchain-openai
+langchain_community
+openai
+loguru
+chromadb
+pysqlite3-binary
+unstructured
+faiss-cpu
+tiktoken
+pypdf
+docx2txt
