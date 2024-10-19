@@ -17,7 +17,7 @@ from langchain.memory import ConversationBufferMemory
 from langchain.vectorstores import FAISS
 
 # API 키 사전 설정
-os.environ["OPENAI_API_KEY"] = 'sk-oudFutCub9l1-2eDdkehT7eokp8o5lyqaaGjpLVGgmT3BlbkFJDgvaDoPhwNmm4bnrCeUQ4GFZEtod8GbaI_LB00AOcA'
+os.environ["OPENAI_API_KEY"] = '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'
 
 # 보드게임 CSV 파일에서 데이터 로드 함수
 def load_boardgames_data(filepath):
