@@ -55,9 +55,12 @@ def show_recommended_games(genre):
     return filtered_games[:5]
 
 def show_recommended_cafes(location):
+    # 선택한 지역에 맞는 카페 필터링
     filtered_cafes = df_cafes[df_cafes['지역'].str.contains(location)]
-    random.shuffle(filtered_cafes)
-    return filtered_cafes[:5]
+    if filtered_cafes.empty:
+        return []  # 카페가 없을 경우 빈 리스트 반환
+    random.shuffle(filtered_cafes)  # 카페 목록을 랜덤으로 섞음
+    return filtered_cafes  # DataFrame 반환
 
 def main():
     st.title("보드게임 추천 시스템")
@@ -66,13 +69,13 @@ def main():
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        if st.button("🎲 보드게임 추천", key="game_recommendation", help="보드게임 추천을 원하시면 클릭하세요"):
+        if st.button("🎲 보드게임 추천"):
             st.session_state.service = 'game_recommendation'
     with col2:
-        if st.button("🏠 보드게임 카페 추천", key="cafe_recommendation", help="보드게임 카페 추천을 원하시면 클릭하세요"):
+        if st.button("🏠 보드게임 카페 추천"):
             st.session_state.service = 'cafe_recommendation'
     with col3:
-        if st.button("🧚‍♀️ 보드게임 요정과 대화하기", key="fairy_chat"):
+        if st.button("🧚‍♀️ 보드게임 요정과 대화하기"):
             st.session_state.service = 'fairy_chat'
 
     if 'service' in st.session_state:
@@ -91,9 +94,12 @@ def main():
             if location:
                 st.write("다음 카페들을 추천합니다:")
                 cafes = show_recommended_cafes(location)
-                for index, row in cafes.iterrows():
-                    st.write(f"- {row['카페 이름']} (방문자리뷰: {row['방문자리뷰수']}) ")
-                    st.markdown(f'<a class="arrow" href="{row["네이버지도주소"]}" target="_blank">➡️</a>', unsafe_allow_html=True)
+                if cafes:  # 카페가 존재할 경우에만 출력
+                    for index, row in cafes.iterrows():
+                        st.write(f"- {row['카페 이름']} (방문자리뷰: {row['방문자리뷰수']}) ")
+                        st.markdown(f'<a class="arrow" href="{row["네이버지도주소"]}" target="_blank">➡️</a>', unsafe_allow_html=True)
+                else:
+                    st.write("해당 지역에 카페가 없습니다.")
 
         elif st.session_state.service == 'fairy_chat':
             # 요정과 대화하는 부분 추가
