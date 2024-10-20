@@ -12,14 +12,14 @@ df_cafes = pd.read_csv('cafes.csv')
 
 def show_recommended_games(genre):
     # 선택한 장르에 맞는 보드게임 필터링
-    filtered_games = df_games[df_games['장르'] == genre]['name'].tolist()
+    filtered_games = df_games[df_games['장르'] == genre]['게임 이름'].tolist()
 
     random.shuffle(filtered_games)  # 게임 목록을 랜덤으로 섞음
     return filtered_games[:5]  # 상위 5개의 게임만 반환
 
 def show_recommended_cafes(location):
     # 선택한 지역에 맞는 카페 필터링
-    filtered_cafes = df_cafes[df_cafes['지역'] == location]['name'].tolist()
+    filtered_cafes = df_cafes[df_cafes['지역'] == location]['카페 이름'].tolist()
     random.shuffle(filtered_cafes)  # 카페 목록을 랜덤으로 섞음
     return filtered_cafes[:5]  # 상위 5개의 카페만 반환
 
