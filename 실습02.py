@@ -10,8 +10,7 @@ import pandas as pd
 df_games = pd.read_csv('boardgames.csv')
 df_cafes = pd.read_csv('cafes.csv')
 
-# 카페 데이터의 열 이름을 출력하여 확인
-st.write("카페 데이터 열 목록:", df_cafes.columns.tolist())
+
 
 def show_recommended_games(genre):
     # 선택한 장르에 맞는 보드게임 필터링
@@ -60,9 +59,9 @@ def main():
                 st.write("다음 카페들을 추천합니다:")
                 cafes = show_recommended_cafes(location)
                 for index, row in cafes.iterrows():
-                    review_count = row['방문자리뷰']  # 이 줄에서 에러가 발생할 수 있음
+                    review_count = row['방문자리뷰수']  
                     naver_link = row['네이버지도주소']
-                    st.write(f"- {row['카페 이름']} (방문자리뷰: {review_count})")
+                    st.write(f"- {row['카페 이름']} (방문자리뷰수: {review_count} 개)")
                     st.button("➡️", key=index, on_click=lambda url=naver_link: open_naver_map(url))
 
         elif st.session_state.service == 'fairy_chat':
