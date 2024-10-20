@@ -10,61 +10,22 @@ import pandas as pd
 df_games = pd.read_csv('boardgames.csv')
 df_cafes = pd.read_csv('cafes.csv')
 
-# 스타일 추가
-st.markdown(
-    """
-    <style>
-    body {
-        background-color: #f0f0f0;
-        font-family: 'Arial', sans-serif;
-    }
-    .title {
-        color: #4CAF50;
-        font-size: 2.5em;
-        text-align: center;
-    }
-    .subheader {
-        font-size: 1.5em;
-        color: #333;
-    }
-    .button {
-        font-size: 1.2em;
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-    .button:hover {
-        background-color: #45a049;
-    }
-    .arrow {
-        font-size: 1.5em;
-        color: #007BFF;
-        cursor: pointer;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
 def show_recommended_games(genre):
+    # 선택한 장르에 맞는 보드게임 필터링
     filtered_games = df_games[df_games['장르'].str.contains(genre)]['게임 이름'].tolist()
-    random.shuffle(filtered_games)
-    return filtered_games[:5]
+    random.shuffle(filtered_games)  # 게임 목록을 랜덤으로 섞음
+    return filtered_games[:5]  # 상위 5개의 게임만 반환
 
 def show_recommended_cafes(location):
     # 선택한 지역에 맞는 카페 필터링
     filtered_cafes = df_cafes[df_cafes['지역'].str.contains(location)]
-    if filtered_cafes.empty:
-        return []  # 카페가 없을 경우 빈 리스트 반환
     random.shuffle(filtered_cafes)  # 카페 목록을 랜덤으로 섞음
-    return filtered_cafes  # DataFrame 반환
+    return filtered_cafes.head(5)  # 상위 5개의 카페만 반환
 
 def main():
     st.title("보드게임 추천 시스템")
 
+    # 첫 번째 선택지: 보드게임 추천과 보드게임 카페 추천
     st.subheader("원하시는 서비스를 선택하세요:")
     col1, col2, col3 = st.columns(3)
 
@@ -78,6 +39,7 @@ def main():
         if st.button("🧚‍♀️ 보드게임 요정과 대화하기"):
             st.session_state.service = 'fairy_chat'
 
+    # 사용자가 선택한 서비스에 따라 다음 단계로 이동
     if 'service' in st.session_state:
         if st.session_state.service == 'game_recommendation':
             st.subheader("어떠한 장르의 보드게임을 찾으시나요?")
@@ -94,21 +56,22 @@ def main():
             if location:
                 st.write("다음 카페들을 추천합니다:")
                 cafes = show_recommended_cafes(location)
-                if cafes:  # 카페가 존재할 경우에만 출력
-                    for index, row in cafes.iterrows():
-                        st.write(f"- {row['카페 이름']} (방문자리뷰: {row['방문자리뷰수']}) ")
-                        st.markdown(f'<a class="arrow" href="{row["네이버지도주소"]}" target="_blank">➡️</a>', unsafe_allow_html=True)
-                else:
-                    st.write("해당 지역에 카페가 없습니다.")
+                for index, row in cafes.iterrows():
+                    st.write(f"- {row['카페 이름']} (방문자리뷰: {row['방문자리뷰수']})")
+                    st.markdown(f"[➡️]({row['네이버지도주소']})", unsafe_allow_html=True)
 
         elif st.session_state.service == 'fairy_chat':
-            # 요정과 대화하는 부분 추가
-            st.subheader("보드게임 요정에게 질문하세요:")
-            query = st.text_input("질문을 입력하세요", key="query")
-            if st.button("전송", key="send_question"):
-                st.session_state.query = query
-                st.session_state.query = ""  # 질문을 보낸 후 입력창 비우기
-                # 요정과 대화 로직 추가 필요
+            st.subheader("보드게임 요정과 대화하기")
+            if 'chat_history' not in st.session_state:
+                st.session_state.chat_history = []
+            user_input = st.text_input("질문을 입력하세요:", "")
+            if st.button("질문하기"):
+                if user_input:
+                    st.session_state.chat_history.append({"user": user_input, "bot": "응답을 생성하는 로직이 필요합니다."})  # 응답 로직 필요
+                    st.session_state.query = ""  # 질문을 보낸 후 입력창 비우기
+            for chat in st.session_state.chat_history:
+                st.write(f"**사용자:** {chat['user']}")
+                st.write(f"**요정:** {chat['bot']}")
 
 if __name__ == "__main__":
     main()
