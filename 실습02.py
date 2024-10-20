@@ -60,11 +60,8 @@ def main():
                     cafe_data = df_cafes[df_cafes['카페 이름'] == cafe].iloc[0]
                     review_count = cafe_data['방문자리뷰수']
                     naver_map_url = cafe_data['네이버지도주소']
-                    st.write(f"- {cafe} (방문자리뷰: {review_count})")
-                    if st.button("➡️", key=cafe):  # 화살표 버튼 클릭 시
-                        # 네이버 지도 주소로 바로 이동
-                        st.experimental_set_query_params(url=naver_map_url)
-                        st.write(f"[{naver_map_url}]({naver_map_url})")  # 리디렉션을 위한 링크
+                    st.write(f"- {cafe} (방문자리뷰: {review_count}) ")
+                    st.markdown(f"[➡️]({naver_map_url})", unsafe_allow_html=True)  # 하이퍼링크로 화살표 버튼
 
         elif st.session_state.service == 'chat_with_fairy':
             st.subheader("보드게임 요정에게 질문하기")
