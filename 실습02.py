@@ -60,7 +60,7 @@ def main():
                     cafe_data = df_cafes[df_cafes['카페 이름'] == cafe].iloc[0]
                     review_count = cafe_data['방문자리뷰수']
                     naver_map_url = cafe_data['네이버지도주소']
-                    st.write(f"- {cafe} (방문자리뷰: {review_count}) ")
+                    st.write(f"- {cafe} (방문자리뷰: {review_count}) ", end=" ")  # 같은 줄에 이어서 쓰기
                     st.markdown(f"[➡️]({naver_map_url})", unsafe_allow_html=True)  # 하이퍼링크로 화살표 버튼
 
         elif st.session_state.service == 'chat_with_fairy':
@@ -76,3 +76,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
