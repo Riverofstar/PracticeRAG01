@@ -61,13 +61,19 @@ def main():
 
         elif st.session_state.service == 'chat_with_fairy':
             st.subheader("보드게임 요정과 대화를 시작하세요!")
-            query = st.text_input("요정에게 질문하기:")
-            if query:
+            query = st.text_input("요정에게 질문하기:", key="query")
+            if st.button("질문 보내기"):
+                if query:
+                    st.write(f"요정의 답변: '{query}'에 대한 답변은 잠시 후 제공됩니다.")  # 요정의 답변을 여기에 추가하세요
+                    st.session_state.query = ""  # 질문을 보낸 후 입력창 비우기
+
+            # 엔터로 질문 보내기 기능 유지
+            if query and st.session_state.query:
                 st.write(f"요정의 답변: '{query}'에 대한 답변은 잠시 후 제공됩니다.")  # 요정의 답변을 여기에 추가하세요
+                st.session_state.query = ""  # 질문을 보낸 후 입력창 비우기
 
 if __name__ == "__main__":
     main()
-
 
 
 
