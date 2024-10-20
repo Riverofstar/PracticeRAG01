@@ -60,17 +60,15 @@ def main():
                     cafe_data = df_cafes[df_cafes['카페 이름'] == cafe].iloc[0]
                     review_count = cafe_data['방문자리뷰수']
                     naver_map_url = cafe_data['네이버지도주소']
-                    
-                    # 카페 이름, 리뷰 수, 화살표를 같은 줄에 표시
-                    st.write(f"- {cafe} (방문자리뷰: {review_count}) ", unsafe_allow_html=True)
-                    st.markdown(f"<a href='{naver_map_url}' target='_blank' style='text-decoration: none;'> ➡️</a>", unsafe_allow_html=True)
+                    st.write(f"- {cafe} (방문자리뷰: {review_count}) ", end=" ")  # 같은 줄에 출력
+                    st.markdown(f"[➡️]({naver_map_url})", unsafe_allow_html=True)  # 하이퍼링크로 화살표 버튼
 
         elif st.session_state.service == 'chat_with_fairy':
             st.subheader("보드게임 요정에게 질문하기")
             if 'conversation' not in st.session_state:
                 st.session_state.conversation = []
             question = st.text_input("질문을 입력하세요:")
-            if st.button("질문하기") or st.text_input("질문을 입력하세요:", key="question_input") and st.session_state.query:
+            if st.button("질문하기") or (question and st.session_state.query):
                 # 질문을 요정에게 보내는 로직 추가
                 st.session_state.conversation.append(question)
                 st.write("요정: [답변이 여기 표시됩니다.]")  # 요정의 답변을 처리하는 로직 필요
