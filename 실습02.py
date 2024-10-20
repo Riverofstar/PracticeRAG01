@@ -63,7 +63,7 @@ def main():
                     
                     # 카페 이름, 리뷰 수, 화살표를 같은 줄에 표시
                     st.write(f"- {cafe} (방문자리뷰: {review_count}) ", unsafe_allow_html=True)
-                    st.markdown(f"[➡️]({naver_map_url})", unsafe_allow_html=True)  # 하이퍼링크로 화살표 버튼
+                    st.markdown(f"<a href='{naver_map_url}' target='_blank' style='text-decoration: none;'>➡️</a>", unsafe_allow_html=True)
 
         elif st.session_state.service == 'chat_with_fairy':
             st.subheader("보드게임 요정에게 질문하기")
