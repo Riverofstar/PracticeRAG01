@@ -7,20 +7,19 @@ from langchain.chains import ConversationalRetrievalChain
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.memory import ConversationBufferMemory
 from langchain.vectorstores import FAISS
-from langchain.chat_models import ChatOpenAI
 from langchain.schema import Document
-
+from langchain.chat_models import ChatOpenAI
 
 # API 키 설정
 os.environ["OPENAI_API_KEY"] = st.secrets["openai"]["api_key"]
 
 # 추천용 데이터 불러오기
 df_games = pd.read_csv('boardgames.csv')
-df_cafes = pd.read_csv('cafes.csv')
+# df_cafes = pd.read_csv('cafes.csv')  # 당분간 제외
 
 # RAG 챗봇용 데이터 불러오기
 df_gameinfo = pd.read_csv('gameinfo.csv')
-# df_cafeinfo = pd.read_csv('cafeinfo.csv')
+# df_cafeinfo = pd.read_csv('cafeinfo.csv')  # 당분간 제외
 
 # 초기 상태 설정
 def init_session_state():
@@ -67,11 +66,11 @@ def show_recommended_games(genre):
     random.shuffle(filtered_games)
     return filtered_games[:5]
 
-# 카페 추천 함수
-def show_recommended_cafes(location):
-    filtered_cafes = df_cafes[df_cafes['지역'].str.contains(location, na=False)]['카페 이름'].tolist()
-    random.shuffle(filtered_cafes)
-    return filtered_cafes[:5]
+# 카페 추천 함수 (임시 주석 처리)
+# def show_recommended_cafes(location):
+#     filtered_cafes = df_cafes[df_cafes['지역'].str.contains(location, na=False)]['카페 이름'].tolist()
+#     random.shuffle(filtered_cafes)
+#     return filtered_cafes[:5]
 
 # 메인 함수
 def main():
@@ -85,8 +84,10 @@ def main():
         if st.button("🎲 보드게임 추천"):
             st.session_state.service = 'game_recommendation'
     with col2:
-        if st.button("🏠 보드게임 카페 추천"):
-            st.session_state.service = 'cafe_recommendation'
+        # 카페 추천 버튼도 임시 주석 처리
+        # if st.button("🏠 보드게임 카페 추천"):
+        #     st.session_state.service = 'cafe_recommendation'
+        pass
     with col3:
         if st.button("🧚 보드게임 요정에게 질문하기"):
             st.session_state.service = 'chat_with_fairy'
@@ -101,18 +102,19 @@ def main():
                 for game in games:
                     st.write(f"- {game}")
 
-        elif st.session_state.service == 'cafe_recommendation':
-            st.subheader("어디에서 하실 예정인가요?")
-            location = st.selectbox("지역 선택", ['홍대', '신촌', '건대입구', '이수', '강남역', '부천'])
-            if location:
-                st.write("다음 카페들을 추천합니다:")
-                cafes = show_recommended_cafes(location)
-                for cafe in cafes:
-                    cafe_data = df_cafes[df_cafes['카페 이름'] == cafe].iloc[0]
-                    review_count = cafe_data['방문자리뷰수']
-                    naver_map_url = cafe_data['네이버지도주소']
-                    st.write(f"- {cafe} (방문자리뷰: {review_count}) ")
-                    st.markdown(f"[➡️ 네이버 지도]({naver_map_url})", unsafe_allow_html=True)
+        # 카페 추천 기능도 임시 주석 처리
+        # elif st.session_state.service == 'cafe_recommendation':
+        #     st.subheader("어디에서 하실 예정인가요?")
+        #     location = st.selectbox("지역 선택", ['홍대', '신촌', '건대입구', '이수', '강남역', '부천'])
+        #     if location:
+        #         st.write("다음 카페들을 추천합니다:")
+        #         cafes = show_recommended_cafes(location)
+        #         for cafe in cafes:
+        #             cafe_data = df_cafes[df_cafes['카페 이름'] == cafe].iloc[0]
+        #             review_count = cafe_data['방문자리뷰수']
+        #             naver_map_url = cafe_data['네이버지도주소']
+        #             st.write(f"- {cafe} (방문자리뷰: {review_count}) ")
+        #             st.markdown(f"[➡️ 네이버 지도]({naver_map_url})", unsafe_allow_html=True)
 
         elif st.session_state.service == 'chat_with_fairy':
             st.subheader("보드게임 요정에게 질문하기")
@@ -120,7 +122,7 @@ def main():
             # 대화 체인 설정
             if st.session_state.conversation is None:
                 # 필요한 텍스트 청크를 문서화
-                text_chunks = df_gameinfo['보드게임간략소개'].tolist() + df_cafeinfo['카페 이름'].tolist()
+                text_chunks = df_gameinfo['보드게임간략소개'].tolist()  # df_cafeinfo 부분 제외
                 vetorestore = get_vectorstore(text_chunks)
                 st.session_state.conversation = get_conversation_chain(vetorestore, os.getenv("OPENAI_API_KEY"))
 
@@ -142,4 +144,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
