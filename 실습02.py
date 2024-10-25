@@ -104,30 +104,24 @@ def main():
                 st.session_state.conversation = get_conversation_chain(vetorestore, os.getenv("OPENAI_API_KEY"))
 
             # 사용자 질문 입력 및 대화
-            if query := st.chat_input("질문을 입력해주세요."):
+            query = st.text_input("질문을 입력해주세요:")
+            if st.button("질문하기"):
                 st.session_state.messages.append({"role": "user", "content": query})
                 
                 # 사용자 메시지 출력
-                with st.chat_message("user"):
-                    st.markdown(query)
+                st.write("user:", query)
 
                 # 응답 생성 및 출력
-                with st.chat_message("assistant"):
-                    chain = st.session_state.conversation
-
-                    with st.spinner("Thinking..."):
-                        result = chain({"question": query})
-                        st.session_state.chat_history = result['chat_history']
-                        response = result['answer']
-                        source_documents = result['source_documents']
-                        st.session_state.messages.append({"role": "assistant", "content": response})
-                        st.markdown(response)
-
-    # 이전 메시지 표시
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+                chain = st.session_state.conversation
+                with st.spinner("Thinking..."):
+                    result = chain({"question": query})
+                    st.session_state.chat_history = result['chat_history']
+                    response = result['answer']
+                    source_documents = result['source_documents']
+                    st.session_state.messages.append({"role": "assistant", "content": response})
+                    st.write("assistant:", response)
 
 if __name__ == "__main__":
     main()
+
 
