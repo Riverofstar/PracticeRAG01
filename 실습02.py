@@ -55,6 +55,19 @@ def get_conversation_chain(vetorestore, openai_api_key):
     )
     return conversation_chain
 
+def show_recommended_games(genre):
+    # 장르에 맞는 보드게임 추천
+    filtered_games = df_games[df_games['장르'].str.contains(genre, na=False)]['게임 이름'].tolist()
+    random.shuffle(filtered_games)
+    return filtered_games[:5]
+
+def show_recommended_cafes(location):
+    # 지역에 맞는 카페 추천
+    filtered_cafes = df_cafes[df_cafes['지역'].str.contains(location, na=False)]['카페 이름'].tolist()
+    random.shuffle(filtered_cafes)
+    return filtered_cafes[:5]
+
+
 # 메인 함수
 def main():
     init_session_state()
