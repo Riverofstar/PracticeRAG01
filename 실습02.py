@@ -9,6 +9,8 @@ from langchain.memory import ConversationBufferMemory
 from langchain.vectorstores import FAISS
 from langchain_core.schema import Document
 from langchain.chat_models import ChatOpenAI
+from langchain.schema import Document
+
 
 # API 키 설정
 os.environ["OPENAI_API_KEY"] = st.secrets["openai"]["api_key"]
