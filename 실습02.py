@@ -66,6 +66,12 @@ def show_recommended_games(genre):
     random.shuffle(filtered_games)
     return filtered_games[:5]
 
+# 카페 추천 함수 (임시 주석 처리)
+# def show_recommended_cafes(location):
+#     filtered_cafes = df_cafes[df_cafes['지역'].str.contains(location, na=False)]['카페 이름'].tolist()
+#     random.shuffle(filtered_cafes)
+#     return filtered_cafes[:5]
+
 # 메인 함수
 def main():
     init_session_state()
@@ -78,7 +84,10 @@ def main():
         if st.button("🎲 보드게임 추천"):
             st.session_state.service = 'game_recommendation'
     with col2:
-        pass  # 카페 추천 관련 부분 임시 제거
+        # 카페 추천 버튼도 임시 주석 처리
+        # if st.button("🏠 보드게임 카페 추천"):
+        #     st.session_state.service = 'cafe_recommendation'
+        pass
     with col3:
         if st.button("🧚 보드게임 요정에게 질문하기"):
             st.session_state.service = 'chat_with_fairy'
@@ -93,6 +102,20 @@ def main():
                 for game in games:
                     st.write(f"- {game}")
 
+        # 카페 추천 기능도 임시 주석 처리
+        # elif st.session_state.service == 'cafe_recommendation':
+        #     st.subheader("어디에서 하실 예정인가요?")
+        #     location = st.selectbox("지역 선택", ['홍대', '신촌', '건대입구', '이수', '강남역', '부천'])
+        #     if location:
+        #         st.write("다음 카페들을 추천합니다:")
+        #         cafes = show_recommended_cafes(location)
+        #         for cafe in cafes:
+        #             cafe_data = df_cafes[df_cafes['카페 이름'] == cafe].iloc[0]
+        #             review_count = cafe_data['방문자리뷰수']
+        #             naver_map_url = cafe_data['네이버지도주소']
+        #             st.write(f"- {cafe} (방문자리뷰: {review_count}) ")
+        #             st.markdown(f"[➡️ 네이버 지도]({naver_map_url})", unsafe_allow_html=True)
+
         elif st.session_state.service == 'chat_with_fairy':
             st.subheader("보드게임 요정에게 질문하기")
 
@@ -104,24 +127,21 @@ def main():
                 st.session_state.conversation = get_conversation_chain(vetorestore, os.getenv("OPENAI_API_KEY"))
 
             # 사용자 질문 입력 및 대화
-            query = st.text_input("질문을 입력해주세요:")
-            if st.button("질문하기"):
+            if query := st.chat_input("질문을 입력해주세요."):
                 st.session_state.messages.append({"role": "user", "content": query})
-                
-                # 사용자 메시지 출력
-                st.write("user:", query)
+                with st.chat_message("user"):
+                    st.markdown(query)
 
-                # 응답 생성 및 출력
-                chain = st.session_state.conversation
-                with st.spinner("Thinking..."):
-                    result = chain({"question": query})
-                    st.session_state.chat_history = result['chat_history']
-                    response = result['answer']
-                    source_documents = result['source_documents']
-                    st.session_state.messages.append({"role": "assistant", "content": response})
-                    st.write("assistant:", response)
+                with st.chat_message("assistant"):
+                    chain = st.session_state.conversation
+
+                    with st.spinner("Thinking..."):
+                        result = chain({"question": query})
+                        st.session_state.chat_history = result['chat_history']
+                        response = result['answer']
+                        source_documents = result['source_documents']
+                        st.markdown(response)
 
 if __name__ == "__main__":
     main()
-
 
