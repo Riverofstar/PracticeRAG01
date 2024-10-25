@@ -1,7 +1,12 @@
 import streamlit as st
+import openai
 import os
 import pandas as pd
 import random
+from langchain.chains import ConversationalRetrievalChain
+from langchain.embeddings import HuggingFaceEmbeddings
+from langchain.memory import ConversationBufferMemory
+from langchain.vectorstores import FAISS
 
 # API 키 설정
 os.environ["OPENAI_API_KEY"] = st.secrets["openai"]["api_key"]
@@ -12,41 +17,49 @@ df_cafes = pd.read_csv('cafes.csv')
 
 # RAG 챗봇용 데이터 불러오기
 df_gameinfo = pd.read_csv('gameinfo.csv')
-# df_cafeinfo = pd.read_csv('cafeinfo.csv')
+df_cafeinfo = pd.read_csv('cafeinfo.csv')
 
-def generate_game_info_template(game_data):
-    # 템플릿에 맞춘 보드게임 정보 답변 생성
-    return f"""
-    [{game_data['보드게임이름']}]
+# 초기 상태 설정
+def init_session_state():
+    if "conversation" not in st.session_state:
+        st.session_state.conversation = None
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = None
+    if "processComplete" not in st.session_state:
+        st.session_state.processComplete = None
+    if 'messages' not in st.session_state:
+        st.session_state['messages'] = [{"role": "assistant", 
+                                         "content": "안녕하세요! 주어진 문서에 대해 궁금하신 것이 있으면 언제든 물어봐주세요!"}]
 
-    장르 : {game_data['보드게임장르']}
-    보드게임소개 : {game_data['보드게임간략소개']}
-    보드게임플레이인원수 : {game_data['보드게임플레이인원수']}
-    게임규칙 : {game_data['게임규칙']}
-    """
+# 벡터스토어 생성
+def get_vectorstore(text_chunks):
+    embeddings = HuggingFaceEmbeddings(
+        model_name="jhgan/ko-sroberta-multitask",
+        model_kwargs={'device': 'cpu'},
+        encode_kwargs={'normalize_embeddings': True}
+    )  
+    vectordb = FAISS.from_documents(text_chunks, embeddings)
+    return vectordb
 
-def find_game_info(question):
-    # 질문에 포함된 보드게임 이름으로 정보 검색
-    game_data = df_gameinfo[df_gameinfo['보드게임이름'].str.contains(question, case=False, na=False)]
-    if not game_data.empty:
-        return generate_game_info_template(game_data.iloc[0])
-    return "해당 보드게임 정보가 없습니다."
+# 대화 체인 생성
+def get_conversation_chain(vetorestore, openai_api_key):
+    llm = ChatOpenAI(openai_api_key=openai_api_key, model_name='gpt-3.5-turbo', temperature=0)
+    conversation_chain = ConversationalRetrievalChain.from_llm(
+        llm=llm, 
+        chain_type="stuff", 
+        retriever=vetorestore.as_retriever(search_type='mmr', verbose=True), 
+        memory=ConversationBufferMemory(memory_key='chat_history', return_messages=True, output_key='answer'),
+        get_chat_history=lambda h: h,
+        return_source_documents=True,
+        verbose=True
+    )
+    return conversation_chain
 
-def show_recommended_games(genre):
-    # 장르에 맞는 보드게임 추천
-    filtered_games = df_games[df_games['장르'].str.contains(genre, na=False)]['게임 이름'].tolist()
-    random.shuffle(filtered_games)
-    return filtered_games[:5]
-
-def show_recommended_cafes(location):
-    # 지역에 맞는 카페 추천
-    filtered_cafes = df_cafes[df_cafes['지역'].str.contains(location, na=False)]['카페 이름'].tolist()
-    random.shuffle(filtered_cafes)
-    return filtered_cafes[:5]
-
+# 메인 함수
 def main():
-    st.title("보드게임 추천 시스템")
+    init_session_state()
 
+    st.title("보드게임 추천 시스템")
     st.subheader("원하시는 서비스를 선택하세요:")
     col1, col2, col3 = st.columns(3)
 
@@ -85,15 +98,30 @@ def main():
 
         elif st.session_state.service == 'chat_with_fairy':
             st.subheader("보드게임 요정에게 질문하기")
-            question = st.text_input("질문을 입력하세요:")
-            if st.button("질문하기"):
-                # 보드게임 정보 검색
-                game_info = find_game_info(question)
-                
-                # 결과 출력
-                st.write("요정:", game_info)
+
+            # 대화 체인 설정
+            if st.session_state.conversation is None:
+                vetorestore = get_vectorstore([...])  # 필요한 텍스트 청크
+                st.session_state.conversation = get_conversation_chain(vetorestore, os.getenv("OPENAI_API_KEY"))
+
+            # 사용자 질문 입력 및 대화
+            if query := st.chat_input("질문을 입력해주세요."):
+                st.session_state.messages.append({"role": "user", "content": query})
+                with st.chat_message("user"):
+                    st.markdown(query)
+
+                with st.chat_message("assistant"):
+                    chain = st.session_state.conversation
+
+                    with st.spinner("Thinking..."):
+                        result = chain({"question": query})
+                        st.session_state.chat_history = result['chat_history']
+                        response = result['answer']
+                        source_documents = result['source_documents']
+                        st.markdown(response)
 
 if __name__ == "__main__":
     main()
+
 
 
