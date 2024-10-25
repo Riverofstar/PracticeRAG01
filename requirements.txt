@@ -1,5 +1,6 @@
 langchain
 langchain-openai
+langchain_core.schema
 langchain_community
 openai
 loguru
