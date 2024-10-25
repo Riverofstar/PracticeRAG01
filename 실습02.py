@@ -7,7 +7,6 @@ from langchain.chains import ConversationalRetrievalChain
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.memory import ConversationBufferMemory
 from langchain.vectorstores import FAISS
-from langchain_core.schema import Document
 from langchain.chat_models import ChatOpenAI
 from langchain.schema import Document
 
