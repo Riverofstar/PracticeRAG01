@@ -20,7 +20,7 @@ df_cafes = pd.read_csv('cafes.csv')
 
 # RAG 챗봇용 데이터 불러오기
 df_gameinfo = pd.read_csv('gameinfo.csv')
-df_cafeinfo = pd.read_csv('cafeinfo.csv')
+# df_cafeinfo = pd.read_csv('cafeinfo.csv')
 
 # 초기 상태 설정
 def init_session_state():
