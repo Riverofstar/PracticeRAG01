@@ -7,6 +7,8 @@ from langchain.chains import ConversationalRetrievalChain
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.memory import ConversationBufferMemory
 from langchain.vectorstores import FAISS
+from langchain_core.schema import Document
+from langchain.chat_models import ChatOpenAI
 
 # API 키 설정
 os.environ["OPENAI_API_KEY"] = st.secrets["openai"]["api_key"]
@@ -17,7 +19,7 @@ df_cafes = pd.read_csv('cafes.csv')
 
 # RAG 챗봇용 데이터 불러오기
 df_gameinfo = pd.read_csv('gameinfo.csv')
-# df_cafeinfo = pd.read_csv('cafeinfo.csv')
+df_cafeinfo = pd.read_csv('cafeinfo.csv')
 
 # 초기 상태 설정
 def init_session_state():
@@ -33,12 +35,15 @@ def init_session_state():
 
 # 벡터스토어 생성
 def get_vectorstore(text_chunks):
+    # Document 객체로 텍스트 청크 변환
+    documents = [Document(page_content=chunk) for chunk in text_chunks]
+
     embeddings = HuggingFaceEmbeddings(
         model_name="jhgan/ko-sroberta-multitask",
         model_kwargs={'device': 'cpu'},
         encode_kwargs={'normalize_embeddings': True}
-    )  
-    vectordb = FAISS.from_documents(text_chunks, embeddings)
+    )
+    vectordb = FAISS.from_documents(documents, embeddings)
     return vectordb
 
 # 대화 체인 생성
@@ -55,18 +60,17 @@ def get_conversation_chain(vetorestore, openai_api_key):
     )
     return conversation_chain
 
+# 보드게임 추천 함수
 def show_recommended_games(genre):
-    # 장르에 맞는 보드게임 추천
     filtered_games = df_games[df_games['장르'].str.contains(genre, na=False)]['게임 이름'].tolist()
     random.shuffle(filtered_games)
     return filtered_games[:5]
 
+# 카페 추천 함수
 def show_recommended_cafes(location):
-    # 지역에 맞는 카페 추천
     filtered_cafes = df_cafes[df_cafes['지역'].str.contains(location, na=False)]['카페 이름'].tolist()
     random.shuffle(filtered_cafes)
     return filtered_cafes[:5]
-
 
 # 메인 함수
 def main():
@@ -114,7 +118,9 @@ def main():
 
             # 대화 체인 설정
             if st.session_state.conversation is None:
-                vetorestore = get_vectorstore([...])  # 필요한 텍스트 청크
+                # 필요한 텍스트 청크를 문서화
+                text_chunks = df_gameinfo['보드게임간략소개'].tolist() + df_cafeinfo['카페 이름'].tolist()
+                vetorestore = get_vectorstore(text_chunks)
                 st.session_state.conversation = get_conversation_chain(vetorestore, os.getenv("OPENAI_API_KEY"))
 
             # 사용자 질문 입력 및 대화
@@ -135,6 +141,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
 
