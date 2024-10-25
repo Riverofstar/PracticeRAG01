@@ -1,47 +1,14 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+# In[ ]:
 import streamlit as st
 import random
 import pandas as pd
-import pdfplumber
-import os
 
 # 보드게임과 카페 데이터를 불러옵니다
 df_games = pd.read_csv('boardgames.csv')
 df_cafes = pd.read_csv('cafes.csv')
-
-# PDF 파일에서 텍스트 추출하는 함수
-def extract_text_from_pdf(file_path):
-    text = ""
-    with pdfplumber.open(file_path) as pdf:
-        for page in pdf.pages:
-            text += page.extract_text()
-    return text
-
-# PDF 파일을 로드하고 텍스트를 추출하여 저장
-pdf_files = {
-    "93.세븐원더스": extract_text_from_pdf("93.세븐원더스.pdf"),
-    "75.펭귄파티": extract_text_from_pdf("75.펭귄파티.pdf"),
-    "86.마르코폴로": extract_text_from_pdf("86.마르코폴로.pdf")
-}
-
-# 사용자의 질문에 대해 관련 문서를 찾고 답변 생성
-def answer_question(question):
-    relevant_text = ""
-    
-    # 간단한 키워드 기반 검색으로 질문과 관련된 문서를 찾음
-    for title, text in pdf_files.items():
-        if any(keyword in question for keyword in title.split(".")):
-            relevant_text += text
-    
-    # 응답 생성 로직
-    if relevant_text:
-        response = f"'{title}' 문서에서 찾은 내용입니다:\n\n" + relevant_text[:500]  # 예시로 첫 500자 반환
-    else:
-        response = "관련된 내용을 찾을 수 없어요. 다른 질문을 해주세요."
-    
-    return response
 
 def show_recommended_games(genre):
     # 선택한 장르에 맞는 보드게임 필터링 (포함)
@@ -101,17 +68,15 @@ def main():
             if 'conversation' not in st.session_state:
                 st.session_state.conversation = []
             question = st.text_input("질문을 입력하세요:")
-            if st.button("질문하기") or question:
-                # 질문을 요정에게 보내고 답변 받기
-                answer = answer_question(question)
-                st.session_state.conversation.append(f"사용자: {question}")
-                st.session_state.conversation.append(f"요정: {answer}")
-                
-                # 대화 내용 출력
-                for line in st.session_state.conversation:
-                    st.write(line)
+            if st.button("질문하기") or (question and st.session_state.query):
+                # 질문을 요정에게 보내는 로직 추가
+                st.session_state.conversation.append(question)
+                st.write("요정: [답변이 여기 표시됩니다.]")  # 요정의 답변을 처리하는 로직 필요
+                st.session_state.query = ""  # 질문을 보낸 후 입력창 비우기
 
 if __name__ == "__main__":
+    main()
+
     main()
 
 
