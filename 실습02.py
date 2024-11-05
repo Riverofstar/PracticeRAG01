@@ -204,31 +204,22 @@ def main():
                 with st.chat_message("user"):
                     st.markdown(query, unsafe_allow_html=True)
 
-                found_game = None
-                for game in df_gameinfo['보드게임이름_no_space'].tolist():
-                    if game in query.replace(" ", "").lower():
-                        found_game = game
-                        break
-
-                if found_game:
-                    response = get_game_details(found_game)
-                    st.session_state.messages.append({"role": "assistant", "content": response})
-                    st.markdown(response, unsafe_allow_html=True)
+                # 장르 기반 질문을 우선적으로 처리
+                if "게임 추천" in query:
+                    response = handle_game_recommendation_from_csv(query)
+                    for line in response:
+                        st.session_state.messages.append({"role": "assistant", "content": line})
+                        st.markdown(line, unsafe_allow_html=True)
                 else:
+                    # 대화 체인 사용
                     with st.chat_message("assistant"):
-                        if "보드게임" in query and "추천" in query and "보드게임 카페" not in query:
-                            recommendation_response = handle_game_recommendation_from_csv(query)
-                            for line in recommendation_response:
-                                st.session_state.messages.append({"role": "assistant", "content": line})
-                                st.markdown(line, unsafe_allow_html=True)
-                        else:
-                            chain = st.session_state.conversation
-                            with st.spinner("Thinking..."):
-                                result = chain({"question": query})
-                                st.session_state.chat_history = result['chat_history']
-                                chat_response = result['answer']
-                                st.session_state.messages.append({"role": "assistant", "content": chat_response})
-                                st.markdown(chat_response, unsafe_allow_html=True)
+                        chain = st.session_state.conversation
+                        with st.spinner("Thinking..."):
+                            result = chain({"question": query})
+                            st.session_state.chat_history = result['chat_history']
+                            chat_response = result['answer']
+                            st.session_state.messages.append({"role": "assistant", "content": chat_response})
+                            st.markdown(chat_response, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
