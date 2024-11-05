@@ -37,14 +37,9 @@ def init_session_state():
 def add_custom_css():
     st.markdown("""
         <style>
-        /* 모바일에 최적화된 글꼴 및 페이지 설정 */
-        body {
-            font-size: 16px; /* 기본 글꼴 크기를 조정 */
-            padding: 10px;
-        }
-        .main .block-container {
-            max-width: 100%; /* 모바일 화면에 맞게 페이지 폭을 넓힘 */
-            padding: 1rem;
+        /* 모바일 최적화 스타일 */
+        html, body {
+            font-size: 16px; /* 기본 글꼴 크기 */
         }
         .stButton>button {
             font-size: 16px; /* 버튼 글꼴 크기 */
@@ -55,6 +50,10 @@ def add_custom_css():
         .st-chat-message {
             font-size: 16px; /* 대화 메시지 글꼴 크기 */
             white-space: pre-wrap; /* 줄바꿈을 위해 설정 */
+        }
+        .main .block-container {
+            padding: 1rem;
+            max-width: 100%; /* 페이지 폭을 넓게 설정 */
         }
         </style>
         """, unsafe_allow_html=True)
@@ -120,6 +119,7 @@ def main():
     
     init_session_state()
 
+    st.set_page_config(layout="wide")  # 페이지 레이아웃을 wide로 설정하여 모바일 사용자에게 더 적합하게 변경
     st.title("보드게임 추천 시스템")
     st.subheader("원하시는 서비스를 선택하세요:")
     col1, col2, col3 = st.columns(3)
