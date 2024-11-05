@@ -92,8 +92,8 @@ def main():
     init_session_state()
 
     # 제목과 서브헤더의 크기를 줄이기 위해 HTML과 CSS를 사용
-    st.markdown("<h1 style='font-size: 24px;'>보드게임 추천 시스템</h1>", unsafe_allow_html=True)
-    st.markdown("<h2 style='font-size: 18px;'>원하시는 서비스를 선택하세요:</h2>", unsafe_allow_html=True)
+    st.markdown("<h1 style='font-size: 32px;'>보드게임 추천 시스템</h1>", unsafe_allow_html=True)
+    st.markdown("<h2 style='font-size: 24px;'>원하시는 서비스를 선택하세요:</h2>", unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns(3)
 
@@ -109,7 +109,7 @@ def main():
 
     if 'service' in st.session_state:
         if st.session_state.service == 'game_recommendation':
-            st.subheader("어떠한 장르의 보드게임을 찾으시나요?")
+            st.markdown("<h3 style='font-size: 20px;'>어떠한 장르의 보드게임을 찾으시나요?</h3>", unsafe_allow_html=True)
             genre = st.selectbox("장르 선택", ['마피아', '순발력', '파티', '전략', '추리', '협력'])
             if genre:
                 st.write("다음 보드게임들을 추천합니다:")
@@ -117,7 +117,7 @@ def main():
                 st.write("\n".join(recommended_games))
 
         elif st.session_state.service == 'cafe_recommendation':
-            st.subheader("어디에서 하실 예정인가요?")
+            st.markdown("<h3 style='font-size: 20px;'>어디에서 하실 예정인가요?</h3>", unsafe_allow_html=True)
             location = st.selectbox("지역 선택", ['홍대', '신촌', '건대입구', '이수', '강남역', '부천'])
             if location:
                 st.write("다음 카페들을 추천합니다:")
@@ -130,7 +130,7 @@ def main():
                     st.markdown(f"[➡️ 네이버 지도]({naver_map_url})", unsafe_allow_html=True)
 
         elif st.session_state.service == 'chat_with_fairy':
-            st.subheader("보드게임 요정에게 질문하기")
+            st.markdown("<h3 style='font-size: 20px;'>보드게임 요정에게 질문하기</h3>", unsafe_allow_html=True)
 
             if st.session_state.conversation is None:
                 text_chunks = df_gameinfo['보드게임간략소개'].tolist() + df_cafeinfo['카페간략소개'].tolist()
