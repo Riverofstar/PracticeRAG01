@@ -37,11 +37,23 @@ def init_session_state():
 def add_custom_css():
     st.markdown("""
         <style>
+        /* 모바일에 최적화된 글꼴 및 페이지 설정 */
+        body {
+            font-size: 16px; /* 기본 글꼴 크기를 조정 */
+            padding: 10px;
+        }
         .main .block-container {
-            max-width: 800px; /* 대화 영역을 넓히기 위해 설정 */
+            max-width: 100%; /* 모바일 화면에 맞게 페이지 폭을 넓힘 */
             padding: 1rem;
         }
+        .stButton>button {
+            font-size: 16px; /* 버튼 글꼴 크기 */
+        }
+        .st-selectbox label {
+            font-size: 16px; /* 셀렉트박스 레이블 크기 */
+        }
         .st-chat-message {
+            font-size: 16px; /* 대화 메시지 글꼴 크기 */
             white-space: pre-wrap; /* 줄바꿈을 위해 설정 */
         }
         </style>
