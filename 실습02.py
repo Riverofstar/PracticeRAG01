@@ -78,24 +78,22 @@ def get_game_details(game_name):
     if not game_row.empty:
         details = game_row.iloc[0]
         response = (
-            f"보드게임 이름: {details['보드게임이름']}\n"
-            f"장르: {details['보드게임장르']}\n"
-            f"간략 소개: {details['보드게임간략소개']}\n"
-            f"플레이 인원수: {details['보드게임플레이인원수']}\n"
+            f"보드게임 이름: {details['보드게임이름']}<br>"
+            f"장르: {details['보드게임장르']}<br>"
+            f"간략 소개: {details['보드게임간략소개']}<br>"
+            f"플레이 인원수: {details['보드게임플레이인원수']}<br>"
             f"게임 규칙: {details['게임규칙']}"
         )
+        return response
     else:
-        response = "해당 보드게임에 대한 정보를 찾을 수 없습니다."
-    return response
+        return "해당 보드게임에 대한 정보를 찾을 수 없습니다."
 
 # 보드게임 추천 처리 함수
 def handle_game_recommendation_from_csv(query):
     if "보드게임" in query and "추천" in query and "보드게임 카페" not in query:
-        # CSV 파일에서 새로운 보드게임 추천
         all_games = df_gameinfo['보드게임이름'].tolist()
         if all_games:
             recommended_games = random.sample(all_games, min(5, len(all_games)))
-            # 각 항목을 개별적으로 출력하도록 리스트 반환
             recommendation_response = ["추천할 수 있는 보드게임 목록은 다음과 같습니다:"]
             recommendation_response.extend([f"◾ {game}" for game in recommended_games])
         else:
@@ -108,7 +106,6 @@ def handle_game_recommendation_from_csv(query):
 def main():
     init_session_state()
 
-    # 제목과 서브헤더의 크기를 줄이기 위해 HTML과 CSS를 사용
     st.markdown("<h1 style='font-size: 24px;'>보드게임 추천 시스템</h1>", unsafe_allow_html=True)
     st.markdown("<h2 style='font-size: 18px;'>원하시는 서비스를 선택하세요:</h2>", unsafe_allow_html=True)
 
@@ -154,7 +151,6 @@ def main():
                 vetorestore = get_vectorstore(text_chunks)
                 st.session_state.conversation = get_conversation_chain(vetorestore, os.getenv("OPENAI_API_KEY"))
 
-            # 이전 대화 내역 표시
             for msg in st.session_state.messages:
                 if msg["role"] == "user":
                     with st.chat_message("user"):
@@ -164,12 +160,10 @@ def main():
                         st.markdown(msg["content"])
 
             if query := st.chat_input("질문을 입력해주세요."):
-                # 사용자 메시지 저장 및 표시
                 st.session_state.messages.append({"role": "user", "content": query})
                 with st.chat_message("user"):
                     st.markdown(query)
 
-                # 보드게임에 대한 설명 요청 처리
                 found_game = None
                 for game in df_gameinfo['보드게임이름'].tolist():
                     if game.lower() in query.lower():
@@ -179,9 +173,8 @@ def main():
                 if found_game:
                     response = get_game_details(found_game)
                     st.session_state.messages.append({"role": "assistant", "content": response})
-                    st.markdown(response)
+                    st.markdown(response, unsafe_allow_html=True)
                 else:
-                    # 챗봇 응답 생성 및 표시
                     with st.chat_message("assistant"):
                         if "보드게임" in query and "추천" in query and "보드게임 카페" not in query:
                             recommendation_response = handle_game_recommendation_from_csv(query)
