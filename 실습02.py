@@ -79,12 +79,13 @@ def handle_game_recommendation_from_csv(query):
         all_games = df_gameinfo['보드게임이름'].tolist()
         if all_games:
             recommended_games = random.sample(all_games, min(5, len(all_games)))
-            # 각 항목 앞에 ◾를 추가하고 줄바꿈 처리
-            recommendation_response = "추천할 수 있는 보드게임 목록은 다음과 같습니다:<br>" + "<br>".join([f"◾ {game}" for game in recommended_games])
+            # 각 항목을 개별적으로 출력하도록 리스트 반환
+            recommendation_response = ["추천할 수 있는 보드게임 목록은 다음과 같습니다:"]
+            recommendation_response.extend([f"◾ {game}" for game in recommended_games])
         else:
-            recommendation_response = "현재 보드게임 데이터를 찾을 수 없습니다."
+            recommendation_response = ["현재 보드게임 데이터를 찾을 수 없습니다."]
     else:
-        recommendation_response = "질문을 이해하지 못했습니다. 다시 질문해 주세요."
+        recommendation_response = ["질문을 이해하지 못했습니다. 다시 질문해 주세요."]
     return recommendation_response
 
 # 메인 함수
@@ -156,8 +157,9 @@ def main():
                 with st.chat_message("assistant"):
                     if "보드게임" in query and "추천" in query and "보드게임 카페" not in query:
                         recommendation_response = handle_game_recommendation_from_csv(query)
-                        st.session_state.messages.append({"role": "assistant", "content": recommendation_response})
-                        st.markdown(recommendation_response)
+                        for line in recommendation_response:
+                            st.session_state.messages.append({"role": "assistant", "content": line})
+                            st.markdown(line)
                     else:
                         chain = st.session_state.conversation
                         with st.spinner("Thinking..."):
