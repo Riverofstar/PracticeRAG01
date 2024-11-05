@@ -46,19 +46,28 @@ def get_vectorstore(text_chunks):
     vectordb = FAISS.from_documents(documents, embeddings)
     return vectordb
 
-# 대화 체인 생성
+# 대화 체인 생성 함수
 def get_conversation_chain(vetorestore, openai_api_key):
     llm = ChatOpenAI(openai_api_key=openai_api_key, model_name='gpt-3.5-turbo', temperature=0)
+
+    if "chat_memory" not in st.session_state:
+        st.session_state.chat_memory = ConversationBufferMemory(
+            memory_key='chat_history',
+            return_messages=True,
+            output_key='answer'
+        )
+
     conversation_chain = ConversationalRetrievalChain.from_llm(
-        llm=llm, 
-        chain_type="stuff", 
-        retriever=vetorestore.as_retriever(search_type='similarity', verbose=True),  # 검색 유형 변경
-        memory=ConversationBufferMemory(memory_key='chat_history', return_messages=True, output_key='answer'),
+        llm=llm,
+        chain_type="stuff",
+        retriever=vetorestore.as_retriever(search_type='similarity', verbose=True),
+        memory=st.session_state.chat_memory,  # 세션 상태에 메모리 저장
         get_chat_history=lambda h: h,
         return_source_documents=True,
         verbose=True
     )
     return conversation_chain
+
 
 
 # 보드게임 추천 함수
