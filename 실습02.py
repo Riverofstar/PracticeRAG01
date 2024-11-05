@@ -131,21 +131,14 @@ def handle_game_recommendation_from_csv(query):
                 recommendation_response.extend([f"◾ {game}" for game in recommended_games])
             else:
                 # 특정 장르의 게임이 없는 경우 오류 메시지
-                recommendation_response = [f"죄송합니다. {found_genre} 장르의 게임 정보를 찾을 수 없습니다."]
+                recommendation_response = [f"죄송합니다. '{found_genre}' 장르의 게임 정보를 찾을 수 없습니다."]
         else:
-            # 장르가 언급되지 않은 경우 전체 보드게임 추천
-            all_games = df_gameinfo['보드게임이름'].tolist()
-            if all_games:
-                recommended_games = random.sample(all_games, min(5, len(all_games)))
-                recommendation_response = ["추천할 수 있는 보드게임 목록은 다음과 같습니다:\n" + "\n".join([f"◾ {game}" for game in recommended_games])]
-            else:
-                recommendation_response = ["현재 보드게임 데이터를 찾을 수 없습니다."]
+            # 장르가 언급되었으나 지원하지 않는 경우
+            recommendation_response = ["죄송합니다. 요청하신 장르에 대한 게임 정보가 없습니다. 예를 들어, '전략 장르 게임 추천해줘'와 같은 요청을 해보세요."]
     else:
         recommendation_response = ["질문을 이해하지 못했습니다. 다시 질문해 주세요."]
 
     return recommendation_response
-
-
 
 
 
