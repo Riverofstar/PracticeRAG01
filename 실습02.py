@@ -15,11 +15,11 @@ os.environ["OPENAI_API_KEY"] = st.secrets["openai"]["api_key"]
 
 # 추천용 데이터 불러오기
 df_games = pd.read_csv('boardgames.csv')
-df_cafes = pd.read_csv('cafes.csv')  # 카페 데이터 활성화
+df_cafes = pd.read_csv('cafes.csv')
 
 # RAG 챗봇용 데이터 불러오기
 df_gameinfo = pd.read_csv('gameinfo.csv')
-df_cafeinfo = pd.read_csv('cafeinfo.csv')  # 카페 데이터 활성화
+df_cafeinfo = pd.read_csv('cafeinfo.csv')
 
 # 초기 상태 설정
 def init_session_state():
@@ -32,12 +32,12 @@ def init_session_state():
     if 'messages' not in st.session_state:
         st.session_state['messages'] = [{"role": "assistant", 
                                          "content": "안녕하세요! 주어진 문서에 대해 궁금하신 것이 있으면 언제든 물어봐주세요!"}]
+    if 'last_recommended_games' not in st.session_state:
+        st.session_state['last_recommended_games'] = []  # 이전에 추천된 게임 목록 저장
 
 # 벡터스토어 생성
 def get_vectorstore(text_chunks):
-    # Document 객체로 텍스트 청크 변환
     documents = [Document(page_content=chunk) for chunk in text_chunks]
-
     embeddings = HuggingFaceEmbeddings(
         model_name="jhgan/ko-sroberta-multitask",
         model_kwargs={'device': 'cpu'},
@@ -46,9 +46,9 @@ def get_vectorstore(text_chunks):
     vectordb = FAISS.from_documents(documents, embeddings)
     return vectordb
 
-# 대화 체인 생성 함수
+# 대화 체인 생성
 def get_conversation_chain(vetorestore, openai_api_key):
-    llm = ChatOpenAI(openai_api_key=openai_api_key, model_name='gpt-3.5-turbo', temperature=0.5)
+    llm = ChatOpenAI(openai_api_key=openai_api_key, model_name='gpt-3.5-turbo', temperature=0)
 
     if "chat_memory" not in st.session_state:
         st.session_state.chat_memory = ConversationBufferMemory(
@@ -57,7 +57,6 @@ def get_conversation_chain(vetorestore, openai_api_key):
             output_key='answer'
         )
 
-    # 사용자 질문에 대해 적절한 문서를 검색하고 답변 생성
     conversation_chain = ConversationalRetrievalChain.from_llm(
         llm=llm,
         chain_type="stuff",
@@ -67,14 +66,14 @@ def get_conversation_chain(vetorestore, openai_api_key):
         return_source_documents=True,
         verbose=True
     )
-
     return conversation_chain
 
-# 사용자의 질문에 기반하여 CSV 파일의 특정 보드게임을 추천
+# 보드게임 추천 함수
 def handle_game_recommendation(query, genre=None):
     if genre:
         filtered_games = df_games[df_games['장르'].str.contains(genre, na=False)]['게임 이름'].tolist()
         if filtered_games:
+            st.session_state['last_recommended_games'] = filtered_games[:5]  # 추천된 게임 저장
             response = f"{genre} 장르의 추천 보드게임은 다음과 같습니다:\n" + "\n".join(filtered_games[:5])
         else:
             response = f"{genre} 장르의 보드게임을 찾을 수 없습니다. 다른 장르를 시도해 보세요."
@@ -82,19 +81,16 @@ def handle_game_recommendation(query, genre=None):
         response = "장르를 선택해 주세요."
     return response
 
-
-
-# 보드게임 추천 함수
-def show_recommended_games(genre):
-    filtered_games = df_games[df_games['장르'].str.contains(genre, na=False)]['게임 이름'].tolist()
-    random.shuffle(filtered_games)
-    return filtered_games[:5]
-
-# 카페 추천 함수
-def show_recommended_cafes(location):
-    filtered_cafes = df_cafes[df_cafes['지역'].str.contains(location, na=False)]['카페 이름'].tolist()
-    random.shuffle(filtered_cafes)
-    return filtered_cafes[:5]
+# 후속 질문 처리
+def handle_follow_up_question(query):
+    if '이름이 뭐야' in query or '게임 이름' in query:
+        if st.session_state['last_recommended_games']:
+            response = "이전에 추천된 보드게임 목록은 다음과 같습니다:\n" + "\n".join(st.session_state['last_recommended_games'])
+        else:
+            response = "이전에 추천된 보드게임이 없습니다. 먼저 추천을 받아보세요."
+    else:
+        response = "질문을 이해하지 못했습니다. 다시 질문해 주세요."
+    return response
 
 # 메인 함수
 def main():
@@ -120,9 +116,8 @@ def main():
             genre = st.selectbox("장르 선택", ['마피아', '순발력', '파티', '전략', '추리', '협력'])
             if genre:
                 st.write("다음 보드게임들을 추천합니다:")
-                games = show_recommended_games(genre)
-                for game in games:
-                    st.write(f"- {game}")
+                response = handle_game_recommendation("보드게임 추천", genre)
+                st.write(response)
 
         elif st.session_state.service == 'cafe_recommendation':
             st.subheader("어디에서 하실 예정인가요?")
@@ -140,28 +135,27 @@ def main():
         elif st.session_state.service == 'chat_with_fairy':
             st.subheader("보드게임 요정에게 질문하기")
 
-            # 대화 체인 설정
             if st.session_state.conversation is None:
-                # 필요한 텍스트 청크를 문서화
-                text_chunks = df_gameinfo['보드게임간략소개'].tolist() + df_cafeinfo['카페간략소개'].tolist()  # 카페 데이터 포함
+                text_chunks = df_gameinfo['보드게임간략소개'].tolist() + df_cafeinfo['카페간략소개'].tolist()
                 vetorestore = get_vectorstore(text_chunks)
                 st.session_state.conversation = get_conversation_chain(vetorestore, os.getenv("OPENAI_API_KEY"))
 
-            # 사용자 질문 입력 및 대화
             if query := st.chat_input("질문을 입력해주세요."):
                 st.session_state.messages.append({"role": "user", "content": query})
                 with st.chat_message("user"):
                     st.markdown(query)
 
                 with st.chat_message("assistant"):
-                    chain = st.session_state.conversation
-
-                    with st.spinner("Thinking..."):
-                        result = chain({"question": query})
-                        st.session_state.chat_history = result['chat_history']
-                        response = result['answer']
-                        source_documents = result['source_documents']
-                        st.markdown(response)
+                    if "이름이 뭐야" in query or "게임 이름" in query:
+                        response = handle_follow_up_question(query)
+                    else:
+                        chain = st.session_state.conversation
+                        with st.spinner("Thinking..."):
+                            result = chain({"question": query})
+                            st.session_state.chat_history = result['chat_history']
+                            response = result['answer']
+                    st.markdown(response)
 
 if __name__ == "__main__":
     main()
+
