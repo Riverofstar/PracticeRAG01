@@ -94,16 +94,28 @@ def get_game_details(game_name):
 
 # 보드게임 추천 처리 함수
 def handle_game_recommendation_from_csv(query):
-    if "보드게임" in query and "추천" in query and "보드게임 카페" not in query:
-        all_games = df_gameinfo['보드게임이름'].tolist()
-        if all_games:
-            recommended_games = random.sample(all_games, min(5, len(all_games)))
-            recommendation_response = ["추천할 수 있는 보드게임 목록은 다음과 같습니다:"]
+    # 지원하는 장르 목록
+    genres = ['마피아', '순발력', '파티', '전략', '추리', '협력', '액션']
+    
+    # 사용자가 언급한 장르 찾기
+    found_genre = None
+    for genre in genres:
+        if genre in query:
+            found_genre = genre
+            break
+
+    if found_genre:
+        # 해당 장르의 보드게임 필터링
+        filtered_games = df_gameinfo[df_gameinfo['보드게임장르'].str.contains(found_genre, na=False)]['보드게임이름'].tolist()
+        if filtered_games:
+            recommended_games = random.sample(filtered_games, min(5, len(filtered_games)))
+            recommendation_response = [f"{found_genre} 장르의 추천 보드게임 목록은 다음과 같습니다:"]
             recommendation_response.extend([f"◾ {game}" for game in recommended_games])
         else:
-            recommendation_response = ["현재 보드게임 데이터를 찾을 수 없습니다."]
+            recommendation_response = [f"죄송합니다. {found_genre} 장르의 보드게임 정보를 찾을 수 없습니다."]
     else:
-        recommendation_response = ["질문을 이해하지 못했습니다. 다시 질문해 주세요."]
+        recommendation_response = ["질문에 언급된 장르가 없습니다. 예를 들어 '추리 장르 보드게임 추천해줘'와 같은 질문을 해보세요."]
+
     return recommendation_response
 
 # 메인 함수
