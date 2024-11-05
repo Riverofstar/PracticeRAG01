@@ -92,8 +92,8 @@ def main():
     init_session_state()
 
     # 제목과 서브헤더의 크기를 줄이기 위해 HTML과 CSS를 사용
-    st.markdown("<h1 style='font-size: 32px;'>보드게임 추천 시스템</h1>", unsafe_allow_html=True)
-    st.markdown("<h2 style='font-size: 24px;'>원하시는 서비스를 선택하세요:</h2>", unsafe_allow_html=True)
+    st.markdown("<h1 style='font-size: 24px;'>보드게임 추천 시스템</h1>", unsafe_allow_html=True)
+    st.markdown("<h2 style='font-size: 18px;'>원하시는 서비스를 선택하세요:</h2>", unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns(3)
 
