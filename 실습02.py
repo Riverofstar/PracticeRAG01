@@ -173,15 +173,15 @@ def main():
             for msg in st.session_state.messages:
                 if msg["role"] == "user":
                     with st.chat_message("user"):
-                        st.markdown(msg["content"])
+                        st.markdown(msg["content"], unsafe_allow_html=True)
                 elif msg["role"] == "assistant":
                     with st.chat_message("assistant"):
-                        st.markdown(msg["content"])
+                        st.markdown(msg["content"], unsafe_allow_html=True)
 
             if query := st.chat_input("질문을 입력해주세요."):
                 st.session_state.messages.append({"role": "user", "content": query})
                 with st.chat_message("user"):
-                    st.markdown(query)
+                    st.markdown(query, unsafe_allow_html=True)
 
                 found_game = None
                 for game in df_gameinfo['보드게임이름_no_space'].tolist():
@@ -199,7 +199,7 @@ def main():
                             recommendation_response = handle_game_recommendation_from_csv(query)
                             for line in recommendation_response:
                                 st.session_state.messages.append({"role": "assistant", "content": line})
-                                st.markdown(line)
+                                st.markdown(line, unsafe_allow_html=True)
                         else:
                             chain = st.session_state.conversation
                             with st.spinner("Thinking..."):
@@ -207,7 +207,7 @@ def main():
                                 st.session_state.chat_history = result['chat_history']
                                 chat_response = result['answer']
                                 st.session_state.messages.append({"role": "assistant", "content": chat_response})
-                                st.markdown(chat_response)
+                                st.markdown(chat_response, unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
