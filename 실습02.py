@@ -34,8 +34,14 @@ def init_session_state():
     if "processComplete" not in st.session_state:
         st.session_state.processComplete = None
     if 'messages' not in st.session_state:
-        st.session_state['messages'] = [{"role": "assistant", 
-                                         "content": "안녕하세요! 주어진 문서에 대해 궁금하신 것이 있으면 언제든 물어봐주세요!"}]
+        st.session_state['messages'] = [{
+            "role": "assistant", 
+            "content": "안녕하세요! 보드게임 요정입니다. 다음과 같은 질문이 가능합니다.<br>"
+                       "-보드게임 추천<br>"
+                       "-보드게임에 대한 정보 질문<br>"
+                       "-장르기반 게임추천"
+        }]
+
 
 # 벡터스토어 생성
 def get_vectorstore(text_chunks):
