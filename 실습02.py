@@ -80,11 +80,11 @@ def get_game_details(game_name):
         # 줄바꿈 문자를 <br>로 대체
         game_rules = details['게임규칙'].replace('\n', '<br>')
         response = (
-            f"보드게임 이름: {details['보드게임이름']}<br>"
-            f"장르: {details['보드게임장르']}<br>"
-            f"간략 소개: {details['보드게임간략소개']}<br>"
-            f"플레이 인원수: {details['보드게임플레이인원수']}<br>"
-            f"게임 규칙:<br> {game_rules}"  # 게임 규칙 텍스트 후 줄바꿈 추가
+            f"<strong>보드게임 이름:</strong> {details['보드게임이름']}<br>"
+            f"<strong>장르:</strong> {details['보드게임장르']}<br>"
+            f"<strong>간략 소개:</strong> {details['보드게임간략소개']}<br>"
+            f"<strong>플레이 인원수:</strong> {details['보드게임플레이인원수']}<br>"
+            f"<strong>게임 규칙</strong><br> {game_rules}"  # 게임 규칙 텍스트 후 줄바꿈 추가
         )
         return response
     else:
