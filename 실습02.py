@@ -10,6 +10,9 @@ from langchain.vectorstores import FAISS
 from langchain.schema import Document
 from langchain.chat_models import ChatOpenAI
 
+# 페이지 레이아웃 설정: 반드시 앱의 가장 첫 번째 위치에 있어야 함
+st.set_page_config(layout="wide")
+
 # API 키 설정
 os.environ["OPENAI_API_KEY"] = st.secrets["openai"]["api_key"]
 
@@ -119,7 +122,6 @@ def main():
     
     init_session_state()
 
-    st.set_page_config(layout="wide")  # 페이지 레이아웃을 wide로 설정하여 모바일 사용자에게 더 적합하게 변경
     st.title("보드게임 추천 시스템")
     st.subheader("원하시는 서비스를 선택하세요:")
     col1, col2, col3 = st.columns(3)
