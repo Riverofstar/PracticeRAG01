@@ -66,18 +66,25 @@ def get_conversation_chain(vetorestore, openai_api_key):
     )
     return conversation_chain
 
+# 보드게임 추천 함수
+def show_recommended_games(genre):
+    filtered_games = df_games[df_games['장르'].str.contains(genre, na=False)]['게임 이름'].tolist()
+    random.shuffle(filtered_games)
+    return filtered_games[:5]
+
 # 보드게임 추천 처리 함수
 def handle_game_recommendation_from_csv(query):
     if "보드게임" in query and "추천" in query and "보드게임 카페" not in query:
         # CSV 파일에서 새로운 보드게임 추천
         all_games = df_gameinfo['보드게임이름'].tolist()
         if all_games:
-            response = "추천할 수 있는 보드게임 목록은 다음과 같습니다:\n" + "\n".join(random.sample(all_games, min(5, len(all_games))))
+            recommended_games = random.sample(all_games, min(5, len(all_games)))
+            recommendation_response = "추천할 수 있는 보드게임 목록은 다음과 같습니다:\n" + "\n".join(recommended_games)
         else:
-            response = "현재 보드게임 데이터를 찾을 수 없습니다."
+            recommendation_response = "현재 보드게임 데이터를 찾을 수 없습니다."
     else:
-        response = "질문을 이해하지 못했습니다. 다시 질문해 주세요."
-    return response
+        recommendation_response = "질문을 이해하지 못했습니다. 다시 질문해 주세요."
+    return recommendation_response
 
 # 메인 함수
 def main():
@@ -103,8 +110,8 @@ def main():
             genre = st.selectbox("장르 선택", ['마피아', '순발력', '파티', '전략', '추리', '협력'])
             if genre:
                 st.write("다음 보드게임들을 추천합니다:")
-                response = handle_game_recommendation("보드게임 추천", genre)
-                st.write(response)
+                recommended_games = show_recommended_games(genre)
+                st.write("\n".join(recommended_games))
 
         elif st.session_state.service == 'cafe_recommendation':
             st.subheader("어디에서 하실 예정인가요?")
@@ -134,14 +141,15 @@ def main():
 
                 with st.chat_message("assistant"):
                     if "보드게임" in query and "추천" in query and "보드게임 카페" not in query:
-                        response = handle_game_recommendation_from_csv(query)
+                        recommendation_response = handle_game_recommendation_from_csv(query)
+                        st.markdown(recommendation_response)
                     else:
                         chain = st.session_state.conversation
                         with st.spinner("Thinking..."):
                             result = chain({"question": query})
                             st.session_state.chat_history = result['chat_history']
-                            response = result['answer']
-                    st.markdown(response)
+                            chat_response = result['answer']
+                        st.markdown(chat_response)
 
 if __name__ == "__main__":
     main()
