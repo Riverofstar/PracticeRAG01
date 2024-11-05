@@ -57,16 +57,30 @@ def get_conversation_chain(vetorestore, openai_api_key):
             output_key='answer'
         )
 
+    # 사용자 질문에 대해 적절한 문서를 검색하고 답변 생성
     conversation_chain = ConversationalRetrievalChain.from_llm(
         llm=llm,
         chain_type="stuff",
         retriever=vetorestore.as_retriever(search_type='similarity', verbose=True),
-        memory=st.session_state.chat_memory,  # 세션 상태에 메모리 저장
+        memory=st.session_state.chat_memory,
         get_chat_history=lambda h: h,
         return_source_documents=True,
         verbose=True
     )
+
     return conversation_chain
+
+# 사용자의 질문에 기반하여 CSV 파일의 특정 보드게임을 추천
+def handle_game_recommendation(query, genre=None):
+    if genre:
+        filtered_games = df_games[df_games['장르'].str.contains(genre, na=False)]['게임 이름'].tolist()
+        if filtered_games:
+            response = f"{genre} 장르의 추천 보드게임은 다음과 같습니다:\n" + "\n".join(filtered_games[:5])
+        else:
+            response = f"{genre} 장르의 보드게임을 찾을 수 없습니다. 다른 장르를 시도해 보세요."
+    else:
+        response = "장르를 선택해 주세요."
+    return response
 
 
 
