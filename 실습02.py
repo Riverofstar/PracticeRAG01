@@ -77,16 +77,19 @@ def get_game_details(game_name):
     game_row = df_gameinfo[df_gameinfo['보드게임이름'].str.lower() == game_name.lower()]
     if not game_row.empty:
         details = game_row.iloc[0]
+        # 줄바꿈 문자를 <br>로 대체
+        game_rules = details['게임규칙'].replace('\n', '<br>')
         response = (
             f"보드게임 이름: {details['보드게임이름']}<br>"
             f"장르: {details['보드게임장르']}<br>"
             f"간략 소개: {details['보드게임간략소개']}<br>"
             f"플레이 인원수: {details['보드게임플레이인원수']}<br>"
-            f"게임 규칙: {details['게임규칙']}"
+            f"게임 규칙: {game_rules}"
         )
         return response
     else:
         return "해당 보드게임에 대한 정보를 찾을 수 없습니다."
+
 
 # 보드게임 추천 처리 함수
 def handle_game_recommendation_from_csv(query):
