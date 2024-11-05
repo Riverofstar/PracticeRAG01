@@ -21,6 +21,10 @@ df_cafes = pd.read_csv('cafes.csv')
 df_gameinfo = pd.read_csv('gameinfo.csv')
 df_cafeinfo = pd.read_csv('cafeinfo.csv')
 
+# '보드게임이름' 및 '보드게임장르' 열의 공백 제거 버전을 추가
+df_gameinfo['보드게임이름_no_space'] = df_gameinfo['보드게임이름'].str.replace(" ", "").str.lower()
+df_gameinfo['보드게임장르_no_space'] = df_gameinfo['보드게임장르'].str.replace(" ", "").str.lower()
+
 # 초기 상태 설정
 def init_session_state():
     if "conversation" not in st.session_state:
@@ -74,39 +78,38 @@ def show_recommended_games(genre):
 
 # 보드게임 설명 함수
 def get_game_details(game_name):
-    game_row = df_gameinfo[df_gameinfo['보드게임이름'].str.lower() == game_name.lower()]
+    game_name_no_space = game_name.replace(" ", "").lower()
+    game_row = df_gameinfo[df_gameinfo['보드게임이름_no_space'] == game_name_no_space]
+
     if not game_row.empty:
         details = game_row.iloc[0]
-        # 줄바꿈 문자를 <br>로 대체
         game_rules = details['게임규칙'].replace('\n', '<br>')
         response = (
             f"<strong>보드게임 이름:</strong> {details['보드게임이름']}<br>"
             f"<strong>장르:</strong> {details['보드게임장르']}<br>"
             f"<strong>간략 소개:</strong> {details['보드게임간략소개']}<br>"
             f"<strong>플레이 인원수:</strong> {details['보드게임플레이인원수']}<br>"
-            f"<strong>게임 규칙</strong><br> {game_rules}"  # 게임 규칙 텍스트 후 줄바꿈 추가
+            f"<strong>게임 규칙</strong><br> {game_rules}"
         )
         return response
     else:
         return "해당 보드게임에 대한 정보를 찾을 수 없습니다."
 
-
-
 # 보드게임 추천 처리 함수
 def handle_game_recommendation_from_csv(query):
-    # 지원하는 장르 목록
-    genres = ['마피아', '순발력', '파티', '전략', '추리', '협력', '액션']
-    
-    # 사용자가 언급한 장르 찾기
+    genres = ['마피아', '순발력', '파티', '전략', '추리', '협력', '액션', '덱 빌딩']
+    query_no_space = query.replace(" ", "").lower()
+
     found_genre = None
     for genre in genres:
-        if genre in query:
+        genre_no_space = genre.replace(" ", "").lower()
+        if genre_no_space in query_no_space:
             found_genre = genre
             break
 
     if found_genre:
-        # 해당 장르의 보드게임 필터링
-        filtered_games = df_gameinfo[df_gameinfo['보드게임장르'].str.contains(found_genre, na=False)]['보드게임이름'].tolist()
+        filtered_games = df_gameinfo[df_gameinfo['보드게임장르_no_space'].str.contains(found_genre.replace(" ", "").lower(), na=False)]['보드게임이름'].tolist()
+        
         if filtered_games:
             recommended_games = random.sample(filtered_games, min(5, len(filtered_games)))
             recommendation_response = [f"{found_genre} 장르의 추천 보드게임 목록은 다음과 같습니다:"]
@@ -181,8 +184,8 @@ def main():
                     st.markdown(query)
 
                 found_game = None
-                for game in df_gameinfo['보드게임이름'].tolist():
-                    if game.lower() in query.lower():
+                for game in df_gameinfo['보드게임이름_no_space'].tolist():
+                    if game in query.replace(" ", "").lower():
                         found_game = game
                         break
 
