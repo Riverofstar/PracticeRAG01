@@ -70,7 +70,7 @@ def get_conversation_chain(vetorestore, openai_api_key):
 def handle_game_recommendation_from_csv(query):
     if "보드게임" in query and "추천" in query and "보드게임 카페" not in query:
         # CSV 파일에서 새로운 보드게임 추천
-        all_games = df_games['보드게임이름'].tolist()
+        all_games = df_gameinfo['보드게임이름'].tolist()
         if all_games:
             response = "추천할 수 있는 보드게임 목록은 다음과 같습니다:\n" + "\n".join(random.sample(all_games, min(5, len(all_games))))
         else:
