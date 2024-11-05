@@ -48,7 +48,7 @@ def get_vectorstore(text_chunks):
 
 # 대화 체인 생성 함수
 def get_conversation_chain(vetorestore, openai_api_key):
-    llm = ChatOpenAI(openai_api_key=openai_api_key, model_name='gpt-3.5-turbo', temperature=0)
+    llm = ChatOpenAI(openai_api_key=openai_api_key, model_name='gpt-3.5-turbo', temperature=0.5)
 
     if "chat_memory" not in st.session_state:
         st.session_state.chat_memory = ConversationBufferMemory(
