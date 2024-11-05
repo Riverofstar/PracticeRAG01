@@ -84,11 +84,12 @@ def get_game_details(game_name):
             f"장르: {details['보드게임장르']}<br>"
             f"간략 소개: {details['보드게임간략소개']}<br>"
             f"플레이 인원수: {details['보드게임플레이인원수']}<br>"
-            f"게임 규칙: {game_rules}"
+            f"게임 규칙:<br> {game_rules}"  # 게임 규칙 텍스트 후 줄바꿈 추가
         )
         return response
     else:
         return "해당 보드게임에 대한 정보를 찾을 수 없습니다."
+
 
 
 # 보드게임 추천 처리 함수
