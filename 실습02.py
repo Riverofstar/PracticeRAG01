@@ -33,6 +33,20 @@ def init_session_state():
         st.session_state['messages'] = [{"role": "assistant", 
                                          "content": "안녕하세요! 주어진 문서에 대해 궁금하신 것이 있으면 언제든 물어봐주세요!"}]
 
+# Streamlit 페이지의 CSS 스타일 추가
+def add_custom_css():
+    st.markdown("""
+        <style>
+        .main .block-container {
+            max-width: 800px; /* 대화 영역을 넓히기 위해 설정 */
+            padding: 1rem;
+        }
+        .st-chat-message {
+            white-space: pre-wrap; /* 줄바꿈을 위해 설정 */
+        }
+        </style>
+        """, unsafe_allow_html=True)
+
 # 벡터스토어 생성
 def get_vectorstore(text_chunks):
     documents = [Document(page_content=chunk) for chunk in text_chunks]
@@ -87,9 +101,11 @@ def handle_game_recommendation_from_csv(query):
         recommendation_response = "질문을 이해하지 못했습니다. 다시 질문해 주세요."
     return recommendation_response
 
-
 # 메인 함수
 def main():
+    # 커스텀 CSS 추가
+    add_custom_css()
+    
     init_session_state()
 
     st.title("보드게임 추천 시스템")
