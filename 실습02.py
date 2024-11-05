@@ -72,6 +72,22 @@ def show_recommended_games(genre):
     random.shuffle(filtered_games)
     return filtered_games[:5]
 
+# 보드게임 설명 함수
+def get_game_details(game_name):
+    game_row = df_gameinfo[df_gameinfo['보드게임이름'].str.lower() == game_name.lower()]
+    if not game_row.empty:
+        details = game_row.iloc[0]
+        response = (
+            f"보드게임 이름: {details['보드게임이름']}\n"
+            f"장르: {details['보드게임장르']}\n"
+            f"간략 소개: {details['보드게임간략소개']}\n"
+            f"플레이 인원수: {details['보드게임플레이인원수']}\n"
+            f"게임 규칙: {details['게임규칙']}"
+        )
+    else:
+        response = "해당 보드게임에 대한 정보를 찾을 수 없습니다."
+    return response
+
 # 보드게임 추천 처리 함수
 def handle_game_recommendation_from_csv(query):
     if "보드게임" in query and "추천" in query and "보드게임 카페" not in query:
@@ -153,21 +169,33 @@ def main():
                 with st.chat_message("user"):
                     st.markdown(query)
 
-                # 챗봇 응답 생성 및 표시
-                with st.chat_message("assistant"):
-                    if "보드게임" in query and "추천" in query and "보드게임 카페" not in query:
-                        recommendation_response = handle_game_recommendation_from_csv(query)
-                        for line in recommendation_response:
-                            st.session_state.messages.append({"role": "assistant", "content": line})
-                            st.markdown(line)
-                    else:
-                        chain = st.session_state.conversation
-                        with st.spinner("Thinking..."):
-                            result = chain({"question": query})
-                            st.session_state.chat_history = result['chat_history']
-                            chat_response = result['answer']
-                            st.session_state.messages.append({"role": "assistant", "content": chat_response})
-                            st.markdown(chat_response)
+                # 보드게임에 대한 설명 요청 처리
+                found_game = None
+                for game in df_gameinfo['보드게임이름'].tolist():
+                    if game.lower() in query.lower():
+                        found_game = game
+                        break
+
+                if found_game:
+                    response = get_game_details(found_game)
+                    st.session_state.messages.append({"role": "assistant", "content": response})
+                    st.markdown(response)
+                else:
+                    # 챗봇 응답 생성 및 표시
+                    with st.chat_message("assistant"):
+                        if "보드게임" in query and "추천" in query and "보드게임 카페" not in query:
+                            recommendation_response = handle_game_recommendation_from_csv(query)
+                            for line in recommendation_response:
+                                st.session_state.messages.append({"role": "assistant", "content": line})
+                                st.markdown(line)
+                        else:
+                            chain = st.session_state.conversation
+                            with st.spinner("Thinking..."):
+                                result = chain({"question": query})
+                                st.session_state.chat_history = result['chat_history']
+                                chat_response = result['answer']
+                                st.session_state.messages.append({"role": "assistant", "content": chat_response})
+                                st.markdown(chat_response)
 
 if __name__ == "__main__":
     main()
