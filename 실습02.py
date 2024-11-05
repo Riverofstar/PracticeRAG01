@@ -103,7 +103,13 @@ def get_game_details(game_name):
 
 # 보드게임 추천 처리 함수
 def handle_game_recommendation_from_csv(query):
-    genres = ['마피아', '순발력', '파티', '전략', '추리', '협력', '액션', '덱 빌딩']
+    # 확장된 장르 목록
+    genres = ['전략', '추리', '카드', '주사위', '파티', '블러핑', '협력', '퍼즐', '탐험', '모험', '순발력', 
+              '경제', '덱 빌딩', '협상', '대결', '수확', '듀얼', '여행', '점수', '추상', '단어', '트릭 테이킹', 
+              '경영', '기억', '레이싱', '팀', '경로 설정', '어드벤처', '공포', '실시간', '엔진 빌딩', '농장 경영', 
+              '패스', '점령', '거래', '퀴즈', '숫자 조합', '숫자', '자원 관리', '숫자 맞추기', '탐정', '카드 거래', 
+              '스피드', '정치', '순위']
+    
     query_no_space = query.replace(" ", "").lower()
 
     found_genre = None
@@ -114,6 +120,7 @@ def handle_game_recommendation_from_csv(query):
             break
 
     if found_genre:
+        # 해당 장르의 보드게임 필터링 (공백 제거하여 비교)
         filtered_games = df_gameinfo[df_gameinfo['보드게임장르_no_space'].str.contains(found_genre.replace(" ", "").lower(), na=False)]['보드게임이름'].tolist()
         
         if filtered_games:
@@ -126,6 +133,7 @@ def handle_game_recommendation_from_csv(query):
         recommendation_response = ["질문에 언급된 장르가 없습니다. 예를 들어 '추리 장르 보드게임 추천해줘'와 같은 질문을 해보세요."]
 
     return recommendation_response
+
 
 # 메인 함수
 def main():
