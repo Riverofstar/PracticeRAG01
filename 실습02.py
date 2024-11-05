@@ -10,9 +10,6 @@ from langchain.vectorstores import FAISS
 from langchain.schema import Document
 from langchain.chat_models import ChatOpenAI
 
-# 페이지 레이아웃 설정: 반드시 앱의 가장 첫 번째 위치에 있어야 함
-st.set_page_config(layout="wide")
-
 # API 키 설정
 os.environ["OPENAI_API_KEY"] = st.secrets["openai"]["api_key"]
 
@@ -40,23 +37,42 @@ def init_session_state():
 def add_custom_css():
     st.markdown("""
         <style>
-        /* 모바일 최적화 스타일 */
-        html, body {
-            font-size: 16px; /* 기본 글꼴 크기 */
+        /* 기본 스타일 */
+        body {
+            font-size: 18px; /* 기본 글꼴 크기 */
         }
         .stButton>button {
-            font-size: 16px; /* 버튼 글꼴 크기 */
+            font-size: 18px; /* 버튼 글꼴 크기 */
         }
         .st-selectbox label {
-            font-size: 16px; /* 셀렉트박스 레이블 크기 */
+            font-size: 18px; /* 셀렉트박스 레이블 크기 */
         }
         .st-chat-message {
-            font-size: 16px; /* 대화 메시지 글꼴 크기 */
-            white-space: pre-wrap; /* 줄바꿈을 위해 설정 */
+            font-size: 18px; /* 대화 메시지 글꼴 크기 */
+            white-space: pre-wrap; /* 줄바꿈 설정 */
         }
         .main .block-container {
             padding: 1rem;
-            max-width: 100%; /* 페이지 폭을 넓게 설정 */
+        }
+
+        /* 모바일 화면을 위한 스타일 */
+        @media (max-width: 768px) {
+            body {
+                font-size: 16px; /* 모바일에서 글꼴 크기 조정 */
+            }
+            .stButton>button {
+                font-size: 16px; /* 모바일 버튼 글꼴 크기 */
+            }
+            .st-selectbox label {
+                font-size: 16px; /* 모바일 셀렉트박스 레이블 크기 */
+            }
+            .st-chat-message {
+                font-size: 16px; /* 모바일 대화 메시지 글꼴 크기 */
+            }
+            .main .block-container {
+                max-width: 100%; /* 모바일에서 페이지 폭 */
+                padding: 0.5rem; /* 모바일에서 패딩 조정 */
+            }
         }
         </style>
         """, unsafe_allow_html=True)
