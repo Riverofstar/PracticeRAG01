@@ -68,26 +68,15 @@ def get_conversation_chain(vetorestore, openai_api_key):
     )
     return conversation_chain
 
-# 보드게임 추천 함수
-def handle_game_recommendation(query, genre=None):
-    if genre:
-        filtered_games = df_games[df_games['장르'].str.contains(genre, na=False)]['게임 이름'].tolist()
-        if filtered_games:
-            st.session_state['last_recommended_games'] = filtered_games[:5]  # 추천된 게임 저장
-            response = f"{genre} 장르의 추천 보드게임은 다음과 같습니다:\n" + "\n".join(filtered_games[:5])
+# 보드게임 추천 처리 함수
+def handle_game_recommendation_from_csv(query):
+    if "보드게임" in query and "추천" in query and "보드게임 카페" not in query:
+        # CSV 파일에서 임의의 보드게임 추천
+        all_games = df_games['게임 이름'].tolist()
+        if all_games:
+            response = "추천할 수 있는 보드게임 목록은 다음과 같습니다:\n" + "\n".join(random.sample(all_games, min(5, len(all_games))))
         else:
-            response = f"{genre} 장르의 보드게임을 찾을 수 없습니다. 다른 장르를 시도해 보세요."
-    else:
-        response = "장르를 선택해 주세요."
-    return response
-
-# 후속 질문 처리
-def handle_follow_up_question(query):
-    if '이름이 뭐야' in query or '게임 이름' in query:
-        if st.session_state['last_recommended_games']:
-            response = "이전에 추천된 보드게임 목록은 다음과 같습니다:\n" + "\n".join(st.session_state['last_recommended_games'])
-        else:
-            response = "이전에 추천된 보드게임이 없습니다. 먼저 추천을 받아보세요."
+            response = "현재 보드게임 데이터를 찾을 수 없습니다."
     else:
         response = "질문을 이해하지 못했습니다. 다시 질문해 주세요."
     return response
@@ -146,8 +135,8 @@ def main():
                     st.markdown(query)
 
                 with st.chat_message("assistant"):
-                    if "이름이 뭐야" in query or "게임 이름" in query:
-                        response = handle_follow_up_question(query)
+                    if "보드게임" in query and "추천" in query and "보드게임 카페" not in query:
+                        response = handle_game_recommendation_from_csv(query)
                     else:
                         chain = st.session_state.conversation
                         with st.spinner("Thinking..."):
