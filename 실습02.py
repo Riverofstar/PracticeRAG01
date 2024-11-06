@@ -148,7 +148,7 @@ def handle_game_recommendation_from_csv(query):
 
     return recommendation_response
 
-# 메인 함수에서 벡터스토어 생성 부분 수정
+# 메인 함수
 def main():
     init_session_state()
 
@@ -168,7 +168,21 @@ def main():
             st.session_state.service = 'chat_with_fairy'
 
     if 'service' in st.session_state:
-        if st.session_state.service == 'chat_with_fairy':
+        if st.session_state.service == 'game_recommendation':
+            st.markdown("<h3 style='font-size: 20px;'>어떠한 장르의 보드게임을 찾으시나요?</h3>", unsafe_allow_html=True)
+            genre = st.selectbox("장르 선택", ['전략', '추리', '카드', '파티', '협력', '모험', '퍼즐', '공포', '기타'])
+            
+            if genre:
+                st.write("추천 보드게임:")
+                recommended_games = df_gameinfo[df_gameinfo['보드게임장르'].str.contains(genre, na=False)]['보드게임이름'].tolist()
+                if recommended_games:
+                    random.shuffle(recommended_games)
+                    for game in recommended_games[:5]:
+                        st.write(f"◾ {game}")
+                else:
+                    st.write(f"'{genre}' 장르의 보드게임을 찾을 수 없습니다.")
+
+        elif st.session_state.service == 'chat_with_fairy':
             st.markdown("<h3 style='font-size: 20px;'>보드게임 요정에게 질문하기</h3>", unsafe_allow_html=True)
 
             if st.session_state.conversation is None:
