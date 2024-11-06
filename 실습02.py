@@ -190,14 +190,17 @@ def main():
                         st.markdown(line, unsafe_allow_html=True)
                 else:
                     # gameinfo.csv의 보드게임 이름을 기준으로 검색
-                    found_game = None
+                    found_games = []
                     for game_name in df_gameinfo['보드게임이름']:
                         if game_name.lower().replace(" ", "") in query.lower().replace(" ", ""):
-                            found_game = game_name
-                            break
+                            found_games.append(game_name)
                     
-                    if found_game:
-                        game_details = get_game_details(found_game)
+                    if len(found_games) > 1:
+                        warning_message = "보드게임 정보에 대한 질문은 한가지씩 물어봐 주세요."
+                        st.session_state.messages.append({"role": "assistant", "content": warning_message})
+                        st.markdown(warning_message, unsafe_allow_html=True)
+                    elif len(found_games) == 1:
+                        game_details = get_game_details(found_games[0])
                         st.session_state.messages.append({"role": "assistant", "content": game_details})
                         st.markdown(game_details, unsafe_allow_html=True)
                     else:
