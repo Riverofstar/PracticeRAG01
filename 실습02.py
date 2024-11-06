@@ -39,9 +39,8 @@ def init_session_state():
             "content": "안녕하세요! 보드게임 요정입니다. 다음과 같은 질문이 가능합니다.<br>"
                        "-보드게임 추천<br>"
                        "-보드게임에 대한 정보 질문<br>"
-                       "-장르기반 게임추천('장르'단어 넣어주세요!)"
+                       "-장르기반 게임추천"
         }]
-
 
 # 벡터스토어 생성
 def get_vectorstore(text_chunks):
@@ -76,33 +75,18 @@ def get_conversation_chain(vetorestore, openai_api_key):
     )
     return conversation_chain
 
-# 보드게임 추천 함수
-def show_recommended_games(genre):
-    filtered_games = df_games[df_games['장르'].str.contains(genre, na=False)]['게임 이름'].tolist()
-    random.shuffle(filtered_games)
-    return filtered_games[:5]
-
-# 보드게임 설명 함수
-def get_game_details(game_name):
-    game_name_no_space = game_name.replace(" ", "").lower()
-    game_row = df_gameinfo[df_gameinfo['보드게임이름_no_space'] == game_name_no_space]
-
-    if not game_row.empty:
-        details = game_row.iloc[0]
-        game_rules = details['게임규칙'].replace('\n', '<br>')
-        response = (
-            f"<strong>보드게임 이름:</strong> {details['보드게임이름']}<br>"
-            f"<strong>장르:</strong> {details['보드게임장르']}<br>"
-            f"<strong>간략 소개:</strong> {details['보드게임간략소개']}<br>"
-            f"<strong>플레이 인원수:</strong> {details['보드게임플레이인원수']}<br>"
-            f"<strong>게임 규칙</strong><br> {game_rules}"
-        )
-        return response
+# 전체 보드게임 추천 함수
+def recommend_all_games():
+    all_games = df_gameinfo['보드게임이름'].tolist()
+    if all_games:
+        recommended_games = random.sample(all_games, min(5, len(all_games)))
+        recommendation_response = ["추천할 수 있는 보드게임 목록은 다음과 같습니다:\n" + "\n".join([f"◾ {game}" for game in recommended_games])]
     else:
-        return "해당 보드게임에 대한 정보를 찾을 수 없습니다."
+        recommendation_response = ["현재 보드게임 데이터를 찾을 수 없습니다."]
+    return recommendation_response
 
-# 보드게임 추천 처리 함수
-def handle_game_recommendation_from_csv(query):
+# 특정 장르의 보드게임 추천 함수
+def recommend_genre_games(query):
     # 확장된 장르 목록
     genres = ['전략', '추리', '카드', '주사위', '파티', '블러핑', '협력', '퍼즐', '탐험', '모험', '순발력', 
               '경제', '덱 빌딩', '협상', '대결', '수확', '듀얼', '여행', '점수', '추상', '단어', '트릭 테이킹', 
@@ -119,28 +103,29 @@ def handle_game_recommendation_from_csv(query):
             found_genre = genre
             break
 
-    # '게임 추천'이라는 단어를 포함한 추천 요청 인식
-    if "게임추천" in query_no_space and "카페" not in query_no_space:
-        if found_genre:
-            # 특정 장르의 보드게임 필터링 (공백 제거하여 비교)
-            filtered_games = df_gameinfo[df_gameinfo['보드게임장르_no_space'].str.contains(found_genre.replace(" ", "").lower(), na=False)]['보드게임이름'].tolist()
-            
-            if filtered_games:
-                recommended_games = random.sample(filtered_games, min(5, len(filtered_games)))
-                recommendation_response = [f"{found_genre} 장르의 추천 게임 목록은 다음과 같습니다:"]
-                recommendation_response.extend([f"◾ {game}" for game in recommended_games])
-            else:
-                # 특정 장르의 게임이 없는 경우 오류 메시지
-                recommendation_response = [f"죄송합니다. '{found_genre}' 장르의 게임 정보를 찾을 수 없습니다."]
+    if found_genre:
+        # 특정 장르의 보드게임 필터링 (공백 제거하여 비교)
+        filtered_games = df_gameinfo[df_gameinfo['보드게임장르_no_space'].str.contains(found_genre.replace(" ", "").lower(), na=False)]['보드게임이름'].tolist()
+        
+        if filtered_games:
+            recommended_games = random.sample(filtered_games, min(5, len(filtered_games)))
+            recommendation_response = [f"{found_genre} 장르의 추천 게임 목록은 다음과 같습니다:"]
+            recommendation_response.extend([f"◾ {game}" for game in recommended_games])
         else:
-            # 장르가 언급되었으나 지원하지 않는 경우
-            recommendation_response = ["죄송합니다. 요청하신 장르에 대한 게임 정보가 없습니다. 예를 들어, '전략 장르 게임 추천해줘'와 같은 요청을 해보세요."]
+            # 특정 장르의 게임이 없는 경우 오류 메시지
+            recommendation_response = [f"죄송합니다. '{found_genre}' 장르의 게임 정보를 찾을 수 없습니다."]
     else:
-        recommendation_response = ["질문을 이해하지 못했습니다. 다시 질문해 주세요."]
-
+        # 장르가 언급되었으나 지원하지 않는 경우
+        recommendation_response = ["죄송합니다. 요청하신 장르에 대한 게임 정보가 없습니다. 예를 들어, '전략 장르 게임 추천해줘'와 같은 요청을 해보세요."]
+    
     return recommendation_response
 
-
+# 보드게임 추천 처리 함수
+def handle_game_recommendation_from_csv(query):
+    if "장르" in query:
+        return recommend_genre_games(query)
+    else:
+        return recommend_all_games()
 
 # 메인 함수
 def main():
@@ -162,28 +147,7 @@ def main():
             st.session_state.service = 'chat_with_fairy'
 
     if 'service' in st.session_state:
-        if st.session_state.service == 'game_recommendation':
-            st.markdown("<h3 style='font-size: 20px;'>어떠한 장르의 보드게임을 찾으시나요?</h3>", unsafe_allow_html=True)
-            genre = st.selectbox("장르 선택", ['마피아', '순발력', '파티', '전략', '추리', '협력'])
-            if genre:
-                st.write("다음 보드게임들을 추천합니다:")
-                recommended_games = show_recommended_games(genre)
-                st.write("\n".join(recommended_games))
-
-        elif st.session_state.service == 'cafe_recommendation':
-            st.markdown("<h3 style='font-size: 20px;'>어디에서 하실 예정인가요?</h3>", unsafe_allow_html=True)
-            location = st.selectbox("지역 선택", ['홍대', '신촌', '건대입구', '이수', '강남역', '부천'])
-            if location:
-                st.write("다음 카페들을 추천합니다:")
-                cafes = show_recommended_cafes(location)
-                for cafe in cafes:
-                    cafe_data = df_cafes[df_cafes['카페 이름'] == cafe].iloc[0]
-                    review_count = cafe_data['방문자리뷰수']
-                    naver_map_url = cafe_data['네이버지도주소']
-                    st.write(f"- {cafe} (방문자리뷰: {review_count}) ")
-                    st.markdown(f"[➡️ 네이버 지도]({naver_map_url})", unsafe_allow_html=True)
-
-        elif st.session_state.service == 'chat_with_fairy':
+        if st.session_state.service == 'chat_with_fairy':
             st.markdown("<h3 style='font-size: 20px;'>보드게임 요정에게 질문하기</h3>", unsafe_allow_html=True)
 
             if st.session_state.conversation is None:
@@ -204,7 +168,7 @@ def main():
                 with st.chat_message("user"):
                     st.markdown(query, unsafe_allow_html=True)
 
-                # 장르 기반 질문을 우선적으로 처리
+                # '게임 추천' 키워드가 들어간 경우 처리
                 if "게임 추천" in query:
                     response = handle_game_recommendation_from_csv(query)
                     for line in response:
