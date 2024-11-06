@@ -170,17 +170,21 @@ def main():
     if 'service' in st.session_state:
         if st.session_state.service == 'game_recommendation':
             st.markdown("<h3 style='font-size: 20px;'>어떠한 장르의 보드게임을 찾으시나요?</h3>", unsafe_allow_html=True)
-            genre = st.selectbox("장르 선택", ['전략', '추리', '카드', '파티', '협력', '모험', '퍼즐', '공포', '기타'])
-            
-            if genre:
+            genres = st.selectbox("장르 선택", ['전략', '추리', '카드', '주사위', '파티', '블러핑', '협력', '퍼즐', '탐험', '모험', '순발력', 
+                                                '경제', '덱 빌딩', '협상', '대결', '수확', '듀얼', '여행', '점수', '추상', '단어', 
+                                                '트릭 테이킹', '경영', '기억', '레이싱', '팀', '경로 설정', '어드벤처', '공포', '실시간', 
+                                                '엔진 빌딩', '농장 경영', '패스', '점령', '거래', '퀴즈', '숫자 조합', '숫자', '자원 관리', 
+                                                '숫자 맞추기', '탐정', '카드 거래', '스피드', '정치', '순위'])
+
+            if genres:
                 st.write("추천 보드게임:")
-                recommended_games = df_gameinfo[df_gameinfo['보드게임장르'].str.contains(genre, na=False)]['보드게임이름'].tolist()
+                recommended_games = df_gameinfo[df_gameinfo['보드게임장르'].str.contains(genres, na=False)]['보드게임이름'].tolist()
                 if recommended_games:
                     random.shuffle(recommended_games)
                     for game in recommended_games[:5]:
                         st.write(f"◾ {game}")
                 else:
-                    st.write(f"'{genre}' 장르의 보드게임을 찾을 수 없습니다.")
+                    st.write(f"'{genres}' 장르의 보드게임을 찾을 수 없습니다.")
 
         elif st.session_state.service == 'chat_with_fairy':
             st.markdown("<h3 style='font-size: 20px;'>보드게임 요정에게 질문하기</h3>", unsafe_allow_html=True)
@@ -233,3 +237,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
