@@ -86,8 +86,8 @@ def handle_game_recommendation_from_csv(query):
 
     query_no_space = query.replace(" ", "").lower()
 
-    # '게임 추천'이라는 단어가 포함된 경우에만 추천
-    if "게임추천" in query_no_space:
+    # '게임'과 '추천' 키워드가 포함된 경우에만 추천 동작
+    if "게임" in query_no_space and ("추천" in query_no_space or "좋을까" in query_no_space or "알려줘" in query_no_space ):
         found_genre = None
 
         # '장르'라는 단어가 들어갈 경우 장르 필터링
@@ -162,8 +162,8 @@ def main():
                 with st.chat_message("user"):
                     st.markdown(query, unsafe_allow_html=True)
 
-                # '게임 추천' 키워드가 들어간 경우 처리
-                if "게임 추천" in query:
+                # '게임'과 '추천' 키워드가 포함된 경우 처리
+                if "게임" in query and ("추천" in query or "좋을까" in query or "알려줘" in query ):
                     response = handle_game_recommendation_from_csv(query)
                     for line in response:
                         st.session_state.messages.append({"role": "assistant", "content": line})
@@ -180,4 +180,3 @@ def main():
                             st.markdown(chat_response, unsafe_allow_html=True)
 
 if __name__ == "__main__":
-    main()
