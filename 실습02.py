@@ -43,7 +43,15 @@ def init_session_state():
         }]
 
 # 벡터스토어 생성
-def get_vectorstore(text_chunks):
+def get_vectorstore(dataframes):
+    text_chunks = []
+    
+    for df in dataframes:
+        # 각 데이터프레임의 모든 행을 문자열로 결합하여 하나의 텍스트로 만듦
+        for _, row in df.iterrows():
+            text_chunk = " ".join([str(value) for value in row.values if pd.notnull(value)])
+            text_chunks.append(text_chunk)
+
     documents = [Document(page_content=chunk) for chunk in text_chunks]
     embeddings = HuggingFaceEmbeddings(
         model_name="jhgan/ko-sroberta-multitask",
@@ -74,7 +82,7 @@ def get_conversation_chain(vetorestore, openai_api_key):
         verbose=True
     )
     return conversation_chain
-    
+
 # 보드게임 설명 함수
 def get_game_details(game_name):
     game_name_no_space = game_name.replace(" ", "").lower()
@@ -94,7 +102,6 @@ def get_game_details(game_name):
     else:
         return "해당 보드게임에 대한 정보를 찾을 수 없습니다."
 
-
 # 보드게임 추천 처리 함수
 def handle_game_recommendation_from_csv(query):
     # 확장된 장르 목록
@@ -107,7 +114,7 @@ def handle_game_recommendation_from_csv(query):
     query_no_space = query.replace(" ", "").lower()
 
     # '게임'과 '추천' 키워드가 포함된 경우에만 추천 동작
-    if "게임" in query_no_space and ("추천" in query_no_space or "좋을까" in query_no_space or "알려줘" in query_no_space ):
+    if "게임" in query_no_space and ("추천" in query_no_space or "좋을까" in query_no_space or "알려줘" in query_no_space):
         found_genre = None
 
         # '장르'라는 단어가 들어갈 경우 장르 필터링
@@ -141,7 +148,7 @@ def handle_game_recommendation_from_csv(query):
 
     return recommendation_response
 
-# 메인 함수
+# 메인 함수에서 벡터스토어 생성 부분 수정
 def main():
     init_session_state()
 
@@ -165,8 +172,7 @@ def main():
             st.markdown("<h3 style='font-size: 20px;'>보드게임 요정에게 질문하기</h3>", unsafe_allow_html=True)
 
             if st.session_state.conversation is None:
-                text_chunks = df_gameinfo['보드게임간략소개'].tolist() + df_cafeinfo['카페간략소개'].tolist()
-                vetorestore = get_vectorstore(text_chunks)
+                vetorestore = get_vectorstore([df_gameinfo, df_cafeinfo])
                 st.session_state.conversation = get_conversation_chain(vetorestore, os.getenv("OPENAI_API_KEY"))
 
             for msg in st.session_state.messages:
@@ -213,6 +219,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
