@@ -74,6 +74,26 @@ def get_conversation_chain(vetorestore, openai_api_key):
         verbose=True
     )
     return conversation_chain
+    
+# 보드게임 설명 함수
+def get_game_details(game_name):
+    game_name_no_space = game_name.replace(" ", "").lower()
+    game_row = df_gameinfo[df_gameinfo['보드게임이름_no_space'] == game_name_no_space]
+
+    if not game_row.empty:
+        details = game_row.iloc[0]
+        game_rules = details['게임규칙'].replace('\n', '<br>')
+        response = (
+            f"<strong>보드게임 이름:</strong> {details['보드게임이름']}<br>"
+            f"<strong>장르:</strong> {details['보드게임장르']}<br>"
+            f"<strong>간략 소개:</strong> {details['보드게임간략소개']}<br>"
+            f"<strong>플레이 인원수:</strong> {details['보드게임플레이인원수']}<br>"
+            f"<strong>게임 규칙</strong><br> {game_rules}"
+        )
+        return response
+    else:
+        return "해당 보드게임에 대한 정보를 찾을 수 없습니다."
+
 
 # 보드게임 추천 처리 함수
 def handle_game_recommendation_from_csv(query):
