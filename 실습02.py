@@ -140,7 +140,7 @@ def handle_game_recommendation_from_csv(query):
             all_games = df_gameinfo['보드게임이름'].tolist()
             if all_games:
                 recommended_games = random.sample(all_games, min(5, len(all_games)))
-                recommendation_response = ["추천할 수 있는 보드게임 목록은 다음과 같습니다:\n" + "\n".join([f"◾ {game}" for game in recommended_games])]
+                recommendation_response = ["추천할 수 있는 보드게임 목록은 다음과 같습니다:<br>" + "<br>".join([f"◾ {game}" for game in recommended_games])]
             else:
                 recommendation_response = ["현재 보드게임 데이터를 찾을 수 없습니다."]
     else:
