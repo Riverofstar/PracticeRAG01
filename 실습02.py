@@ -75,57 +75,51 @@ def get_conversation_chain(vetorestore, openai_api_key):
     )
     return conversation_chain
 
-# 전체 보드게임 추천 함수
-def recommend_all_games():
-    all_games = df_gameinfo['보드게임이름'].tolist()
-    if all_games:
-        recommended_games = random.sample(all_games, min(5, len(all_games)))
-        recommendation_response = ["추천할 수 있는 보드게임 목록은 다음과 같습니다:\n" + "\n".join([f"◾ {game}" for game in recommended_games])]
-    else:
-        recommendation_response = ["현재 보드게임 데이터를 찾을 수 없습니다."]
-    return recommendation_response
-
-# 특정 장르의 보드게임 추천 함수
-def recommend_genre_games(query):
+# 보드게임 추천 처리 함수
+def handle_game_recommendation_from_csv(query):
     # 확장된 장르 목록
     genres = ['전략', '추리', '카드', '주사위', '파티', '블러핑', '협력', '퍼즐', '탐험', '모험', '순발력', 
               '경제', '덱 빌딩', '협상', '대결', '수확', '듀얼', '여행', '점수', '추상', '단어', '트릭 테이킹', 
               '경영', '기억', '레이싱', '팀', '경로 설정', '어드벤처', '공포', '실시간', '엔진 빌딩', '농장 경영', 
               '패스', '점령', '거래', '퀴즈', '숫자 조합', '숫자', '자원 관리', '숫자 맞추기', '탐정', '카드 거래', 
               '스피드', '정치', '순위']
-    
+
     query_no_space = query.replace(" ", "").lower()
 
-    found_genre = None
-    for genre in genres:
-        genre_no_space = genre.replace(" ", "").lower()
-        if genre_no_space in query_no_space:
-            found_genre = genre
-            break
+    # '게임 추천'이라는 단어가 포함된 경우에만 추천
+    if "게임추천" in query_no_space:
+        found_genre = None
 
-    if found_genre:
-        # 특정 장르의 보드게임 필터링 (공백 제거하여 비교)
-        filtered_games = df_gameinfo[df_gameinfo['보드게임장르_no_space'].str.contains(found_genre.replace(" ", "").lower(), na=False)]['보드게임이름'].tolist()
-        
-        if filtered_games:
-            recommended_games = random.sample(filtered_games, min(5, len(filtered_games)))
-            recommendation_response = [f"{found_genre} 장르의 추천 게임 목록은 다음과 같습니다:"]
-            recommendation_response.extend([f"◾ {game}" for game in recommended_games])
+        # '장르'라는 단어가 들어갈 경우 장르 필터링
+        for genre in genres:
+            genre_no_space = genre.replace(" ", "").lower()
+            if genre_no_space in query_no_space:
+                found_genre = genre
+                break
+
+        if found_genre:
+            # 특정 장르의 보드게임 필터링
+            filtered_games = df_gameinfo[df_gameinfo['보드게임장르_no_space'].str.contains(found_genre.replace(" ", "").lower(), na=False)]['보드게임이름'].tolist()
+            
+            if filtered_games:
+                recommended_games = random.sample(filtered_games, min(5, len(filtered_games)))
+                recommendation_response = [f"{found_genre} 장르의 추천 게임 목록은 다음과 같습니다:"]
+                recommendation_response.extend([f"◾ {game}" for game in recommended_games])
+            else:
+                # 특정 장르의 게임이 없는 경우 오류 메시지
+                recommendation_response = [f"죄송합니다. '{found_genre}' 장르의 게임 정보를 찾을 수 없습니다."]
         else:
-            # 특정 장르의 게임이 없는 경우 오류 메시지
-            recommendation_response = [f"죄송합니다. '{found_genre}' 장르의 게임 정보를 찾을 수 없습니다."]
+            # 장르가 언급되지 않은 경우 전체 보드게임 추천
+            all_games = df_gameinfo['보드게임이름'].tolist()
+            if all_games:
+                recommended_games = random.sample(all_games, min(5, len(all_games)))
+                recommendation_response = ["추천할 수 있는 보드게임 목록은 다음과 같습니다:\n" + "\n".join([f"◾ {game}" for game in recommended_games])]
+            else:
+                recommendation_response = ["현재 보드게임 데이터를 찾을 수 없습니다."]
     else:
-        # 장르가 언급되었으나 지원하지 않는 경우
-        recommendation_response = ["죄송합니다. 요청하신 장르에 대한 게임 정보가 없습니다. 예를 들어, '전략 장르 게임 추천해줘'와 같은 요청을 해보세요."]
-    
-    return recommendation_response
+        recommendation_response = ["질문을 이해하지 못했습니다. 다시 질문해 주세요."]
 
-# 보드게임 추천 처리 함수
-def handle_game_recommendation_from_csv(query):
-    if "장르" in query:
-        return recommend_genre_games(query)
-    else:
-        return recommend_all_games()
+    return recommendation_response
 
 # 메인 함수
 def main():
