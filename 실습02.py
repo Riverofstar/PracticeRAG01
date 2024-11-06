@@ -180,3 +180,5 @@ def main():
                             st.markdown(chat_response, unsafe_allow_html=True)
 
 if __name__ == "__main__":
+    main()  # 들여쓰기 문제를 해결하기 위해 main() 호출 추가
+
