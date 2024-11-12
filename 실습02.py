@@ -19,7 +19,8 @@ df_cafes = pd.read_csv('cafes.csv')
 
 # RAG 챗봇용 데이터 불러오기
 df_gameinfo = pd.read_csv('gameinfo.csv')
-df_cafeinfo = pd.read_csv('cafeinfo.csv')
+df_cafeinfo = pd.read_csv('cafeinfo.csv', encoding='cp949')
+
 
 # '보드게임이름' 및 '보드게임장르' 열의 공백 제거 버전을 추가
 df_gameinfo['보드게임이름_no_space'] = df_gameinfo['보드게임이름'].str.replace(" ", "").str.lower()
