@@ -247,7 +247,8 @@ def main():
             
             if selected_region:
                 # 선택한 지역의 카페 필터링 및 추천
-                filtered_cafes = df_cafeinfo[df_cafeinfo['tag'] == selected_region]['카페이름'].tolist()
+                filtered_cafes = df_cafeinfo[df_cafeinfo['tag'] == selected_region]['name'].tolist()
+
                 if filtered_cafes:
                     st.write(f"{selected_region} 지역의 추천 보드게임 카페:")
                     for cafe in random.sample(filtered_cafes, min(5, len(filtered_cafes))):
