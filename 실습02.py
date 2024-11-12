@@ -235,6 +235,25 @@ def main():
                                 st.session_state.messages.append({"role": "assistant", "content": chat_response})
                                 st.markdown(chat_response, unsafe_allow_html=True)
 
+
+    if 'service' in st.session_state:
+        if st.session_state.service == 'cafe_recommendation':
+            st.markdown("<h3 style='font-size: 20px;'>어느 지역의 보드게임 카페를 찾으시나요?</h3>", unsafe_allow_html=True)
+            
+            # 지역 선택 옵션 추가
+            regions = df_cafeinfo['tag'].unique().tolist()
+            selected_region = st.selectbox("지역 선택", regions)
+            
+            if selected_region:
+                # 선택한 지역의 카페 필터링 및 추천
+                filtered_cafes = df_cafeinfo[df_cafeinfo['tag'] == selected_region]['카페이름'].tolist()
+                if filtered_cafes:
+                    st.write(f"{selected_region} 지역의 추천 보드게임 카페:")
+                    for cafe in random.sample(filtered_cafes, min(5, len(filtered_cafes))):
+                        st.write(f"◾ {cafe}")
+                else:
+                    st.write(f"'{selected_region}' 지역의 보드게임 카페 정보를 찾을 수 없습니다.")
+
 if __name__ == "__main__":
     main()
 
