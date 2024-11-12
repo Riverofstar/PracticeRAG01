@@ -178,7 +178,7 @@ def main():
                                                 '숫자 맞추기', '탐정', '카드 거래', '스피드', '정치', '순위'])
 
             if genres:
-                st.write("추천 보드게임:")
+                st.write("추천 보드게임(랜덤5개)")
                 recommended_games = df_gameinfo[df_gameinfo['보드게임장르'].str.contains(genres, na=False)]['보드게임이름'].tolist()
                 if recommended_games:
                     random.shuffle(recommended_games)
