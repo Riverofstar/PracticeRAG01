@@ -247,14 +247,21 @@ def main():
             
             if selected_region:
                 # 선택한 지역의 카페 필터링 및 추천
-                filtered_cafes = df_cafeinfo[df_cafeinfo['tag'] == selected_region]['name'].tolist()
-
-                if filtered_cafes:
+                filtered_cafes = df_cafeinfo[df_cafeinfo['tag'] == selected_region][['name', 'degree', 'link']]
+                
+                if not filtered_cafes.empty:
                     st.write(f"{selected_region} 지역의 추천 보드게임 카페:")
-                    for cafe in random.sample(filtered_cafes, min(5, len(filtered_cafes))):
-                        st.write(f"◾ {cafe}")
+                    
+                    for _, row in filtered_cafes.iterrows():
+                        cafe_name = row['name']
+                        cafe_degree = row['degree']
+                        cafe_link = row['link']
+                        
+                        # 카페 이름과 평점 출력, 링크 아이콘에 하이퍼링크 추가
+                        st.markdown(f"◾ **{cafe_name}** - 평점: {cafe_degree} [🔗 링크]({cafe_link})", unsafe_allow_html=True)
                 else:
                     st.write(f"'{selected_region}' 지역의 보드게임 카페 정보를 찾을 수 없습니다.")
+
 
 if __name__ == "__main__":
     main()
