@@ -19,10 +19,6 @@ from langchain.chat_models import ChatOpenAI
 # API 키 설정
 os.environ["OPENAI_API_KEY"] = st.secrets["openai"]["api_key"]
 
-# 추천용 데이터 불러오기
-# df_games = pd.read_csv('boardgames.csv') 안씀
-#df_cafes = pd.read_csv('cafes.csv')
-
 # RAG 챗봇용 데이터 불러오기
 df_gameinfo = pd.read_csv('gameinfo.csv')
 df_cafeinfo = pd.read_csv('cafeinfo.csv', encoding='cp949')
