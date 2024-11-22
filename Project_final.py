@@ -260,7 +260,11 @@ def main():
                         cafe_link = row['link']
                         
                         # 카페 이름과 평점 출력, 링크 아이콘에 하이퍼링크 추가
-                        st.markdown(f"◾ **{cafe_name}** - 평점: {cafe_degree} [🏠 LINK]({cafe_link})", unsafe_allow_html=True)
+                        st.markdown(
+                                    f'<a href="{cafe_link}" target="_self">🏠 LINK</a>',
+                                    unsafe_allow_html=True
+                        )
+                        #st.markdown(f"◾ **{cafe_name}** - 평점: {cafe_degree} [🏠 LINK]({cafe_link})", unsafe_allow_html=True)
                 else:
                     st.write(f"'{selected_region}' 지역의 보드게임 카페 정보를 찾을 수 없습니다.")
 
